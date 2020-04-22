@@ -1,8 +1,5 @@
 #!/bin/bash
-keyboard="1a2c:427c"
-mouse="1532:0020"
-audio="1038:1228"
-files=$HOME/VMs
+files=.
 
 echo 0 > /sys/class/vtconsole/vtcon0/bind
 echo 0 > /sys/class/vtconsole/vtcon1/bind
@@ -22,13 +19,22 @@ qemu-system-x86_64 \
     -enable-kvm -M q35 -m 8192 -cpu host -smp 8,sockets=1,cores=4,threads=2 \
     -bios /usr/share/qemu/bios.bin -vga none \
     -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 \
+    -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2 \
+    -device pcie-root-port,port=0x11,chassis=3,id=pci.2,bus=pcie.0,addr=0x2.0x1 \
+    -device pcie-root-port,port=0x12,chassis=4,id=pci.3,bus=pcie.0,addr=0x2.0x2 \
+    -device pcie-root-port,port=0x13,chassis=5,id=pci.4,bus=pcie.0,addr=0x2.0x3 \
+    -device pcie-root-port,port=0x14,chassis=6,id=pci.5,bus=pcie.0,addr=0x2.0x4 \
+    -device pcie-root-port,port=0x8,chassis=7,id=pci.6,bus=pcie.0,multifunction=on,addr=0x1 \
+    -device pcie-root-port,port=0x9,chassis=8,id=pci.7,bus=pcie.0,addr=0x1.0x1 \
+    -device pcie-pci-bridge,id=pci.8,bus=pci.5,addr=0x0 \
+    -device qemu-xhci,p2=15,p3=15,id=usb,bus=pci.2,addr=0x0 \
     -device vfio-pci,host=03:00.0,bus=root.1,addr=00.0,multifunction=on,x-vga=on,romfile=$files/Ellesmere.rom \
     -device vfio-pci,host=03:00.1,bus=pcie.0 \
     -device virtio-net,netdev=vmnic -netdev user,id=vmnic \
     -hda /dev/sdc \
-    -drive media=cdrom,file=$files/virtio.iso,id=cd1,if=none \
-    -device ide-cd,bus=ide.1,drive=cd1 \
-    -object input-linux,id=kbd,evdev=/dev/input/by-id/usb-COUGAR_Vantar_COUGAR_Vantar-event-kbd,grab_all=on,repeat=on \
-    -object input-linux,id=kbd2,evdev=/dev/input/by-id/usb-COUGAR_Vantar_COUGAR_Vantar-if01-event-kbd,grab_all=on,repeat=on \
-    -object input-linux,id=mouse-event,evdev=/dev/input/by-id/usb-Razer_Razer_Abyssus_1800-event-mouse \
-    -object input-linux,id=kbd3,evdev=/dev/input/by-id/usb-Razer_Razer_Abyssus_1800-if01-event-kbd,grab_all=on,repeat=on
+#   -drive media=cdrom,file=$files/virtio.iso,id=cd1,if=none \
+#   -device ide-cd,bus=ide.1,drive=cd1 \
+    -device usb-host,hostbus=6,hostaddr=2,id=hostdev0,bus=usb.0,port=1 \
+    -device usb-host,hostbus=6,hostaddr=3,id=hostdev1,bus=usb.0,port=2 \
+    -device usb-host,hostbus=8,hostaddr=2,id=hostdev2,bus=usb.0,port=3 
+
