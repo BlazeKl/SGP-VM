@@ -19,7 +19,7 @@ echo -n "1002 aaf0" > /sys/bus/pci/drivers/vfio-pci/new_id
 qemu-system-x86_64 \
     -runas vm \
     -nographic -vga none -parallel none -serial none \
-    -enable-kvm -M q35 -m 8192 -cpu host -smp 1,maxcpus=12,sockets=1,cores=6,threads=2 \ 
+    -enable-kvm -M q35 -m 8192 -cpu host -smp 1,maxcpus=12,sockets=1,cores=6,threads=2 \
     -bios /usr/share/qemu/bios.bin -vga none \
     -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 \
     -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2 \
