@@ -19,7 +19,7 @@ echo -n "1002 aaf0" > /sys/bus/pci/drivers/vfio-pci/new_id
 qemu-system-x86_64 \
     -runas vm \
     -nographic -vga none -parallel none -serial none \
-    -enable-kvm -M q35 -m 8192 -cpu Westmere-IBRS,vme=on,pclmulqdq=on,vmx=on,pcid=on,x2apic=on,tsc-deadline=on,hypervisor=on,arat=on,tsc-adjust=on,umip=on,stibp=on,arch-capabilities=on,ssbd=on,pdpe1gb=on,rdtscp=on,ibpb=on,amd-ssbd=on,hv-time,hv-relaxed,hv-vapic,hv-spinlocks=0x1fff -smp 12,sockets=1,cores=6,threads=2 \
+    -enable-kvm -M q35 -m 8192 -cpu host -smp 12,sockets=1,cores=6,threads=2 \
     -bios /usr/share/qemu/bios.bin -vga none \
     -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 \
     -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2 \
@@ -35,13 +35,11 @@ qemu-system-x86_64 \
     -device vfio-pci,host=03:00.1,bus=pcie.0 \
     -device virtio-net,netdev=vmnic -netdev user,id=vmnic \
     -hda /dev/sdc \
+    -hdb /dev/sda1 \
     -device usb-host,hostbus=6,hostaddr=2,id=hostdev0,bus=usb.0,port=1 \
     -device usb-host,hostbus=6,hostaddr=3,id=hostdev1,bus=usb.0,port=2 \
     -device usb-host,hostbus=8,hostaddr=2,id=hostdev2,bus=usb.0,port=3 
-    
-#   -drive media=cdrom,file=$files/virtio.iso,id=cd1,if=none \
-#   -device ide-cd,bus=ide.1,drive=cd1 \
-    
+
 echo -n "0000:03:00.0" > /sys/bus/pci/drivers/vfio-pci/unbind
 echo -n "0000:03:00.1" > /sys/bus/pci/drivers/vfio-pci/unbind
 
