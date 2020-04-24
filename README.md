@@ -14,4 +14,4 @@ Using another user with sudo permissions is usefull to avoid errors with DEs lik
 
 - [x] Rebind GPU (Reset bug!)
 - [x] Better USB Passthrough
-- [x] Audio
+- [x] Audio (USB)
