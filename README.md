@@ -3,7 +3,8 @@ Single GPU Passthrough VM script for RX 470
 
 ### Windows Scripts
 
-enablegpu.bat and disablegpu.bat are needed on the windows virtual machine to avoid AMDGPU reset bug (Windows 10 Pro only)
+Included batch files are needed on the virtual machine to avoid AMDGPU reset bug, Win 10 Pro is needed
+
 https://forum.level1techs.com/t/linux-host-windows-guest-gpu-passthrough-reinitialization-fix/121097
 
 ### Using another user
