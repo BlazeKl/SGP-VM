@@ -1,0 +1,18 @@
+#Parameters
+OSK="ourhardworkbythesewordsguardedpleasedontsteal(c)AppleComputerInc"
+IMGS=/mnt/GAMES/VM
+VMDIR=$PWD
+VBIOS=$VMDIR/vbios
+OVMF=$VMDIR/firmware
+
+#GPU IDs
+GPUVID='1002'
+GPUPID='67df'
+HDMIPID='aaf0'
+
+#USB Devices IDs
+USB0='1038:1228'
+USB1='1532:0020'
+USB2='1a2c:427c'
+USB3='1b3f:2008'
+USB4='28de:1142'
