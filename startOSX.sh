@@ -62,7 +62,10 @@ qemu-system-x86_64 \
     -device pcie-root-port,port=0x8,chassis=7,id=pci.6,bus=pcie.0,multifunction=on,addr=0x1 \
     -device pcie-root-port,port=0x9,chassis=8,id=pci.7,bus=pcie.0,addr=0x1.0x1 \
     -device pcie-pci-bridge,id=pci.8,bus=pci.5,addr=0x0 \
-    -device qemu-xhci,p2=15,p3=15,id=usb,bus=pci.2,addr=0x0 \
+    -device ich9-usb-ehci1,id=usb,bus=pcie.0,addr=0x1d.0x7 \
+    -device ich9-usb-uhci1,masterbus=usb.0,firstport=0,bus=pcie.0,multifunction=on,addr=0x1d \
+    -device ich9-usb-uhci2,masterbus=usb.0,firstport=2,bus=pcie.0,addr=0x1d.0x1 \
+    -device ich9-usb-uhci3,masterbus=usb.0,firstport=4,bus=pcie.0,addr=0x1d.0x2 \
     -device vfio-pci,host="$GPUIOMMU",bus=root.1,addr=00.0,multifunction=on,x-vga=on,romfile="$VBIOS/Ellesmere.rom" \
     -device vfio-pci,host="$HDMIOMMU",bus=pcie.0 \
     -netdev user,id=net0 \
@@ -72,10 +75,10 @@ qemu-system-x86_64 \
     -device ide-hd,bus=sata.2,drive=ESP \
     -drive id=SystemDisk,if=none,file="$IMGS/MHDD.qcow2" \
     -device ide-hd,bus=sata.4,drive=SystemDisk \
-    -device usb-host,hostbus="$BUS0",hostaddr="$ID0",id=hostdev0,bus=usb.0,port=1 \
+    -device usb-host,hostbus="$BUS0",hostaddr="$ID0",id=hostdev3,bus=usb.0,port=4 \
     -device usb-host,hostbus="$BUS1",hostaddr="$ID1",id=hostdev1,bus=usb.0,port=2 \
     -device usb-host,hostbus="$BUS2",hostaddr="$ID2",id=hostdev2,bus=usb.0,port=3 \
-    -device usb-host,hostbus="$BUS3",hostaddr="$ID3",id=hostdev3,bus=usb.0,port=4 \
+    -device usb-host,hostbus="$BUS3",hostaddr="$ID3",id=hostdev0,bus=usb.0,port=1 \
     -device usb-host,hostbus="$BUS4",hostaddr="$ID4",id=hostdev4,bus=usb.0,port=5 
     
 #Rebind GPU to host

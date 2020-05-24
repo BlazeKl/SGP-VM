@@ -26,4 +26,5 @@ intel_iommu=on iommu=pt vfio_iommu_type1.allow_unsafe_interrupts=1 kvm.ignore_ms
 - [x] Rebind GPU (Reset bug)
 - [x] Better USB Passthrough
 - [x] Audio (USB)
-- [ ] Fix OSX USB
+- [x] Fix OSX USB
+- [ ] Fix secondary vga monitor corruption (OSX)
