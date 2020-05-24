@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Load config file
-source ./config
+source "${BASH_SOURCE%/*}/config"
 
 #Get GPU IOMMU Group
 GPUIOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$GPUVID:$GPUPID.{0,0}" | cut -c 1-7)

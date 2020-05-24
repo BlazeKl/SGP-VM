@@ -1,7 +1,7 @@
 #Parameters
 OSK="ourhardworkbythesewordsguardedpleasedontsteal(c)AppleComputerInc"
 IMGS=/mnt/GAMES/VM
-VMDIR=$PWD
+VMDIR=${BASH_SOURCE%/*}
 VBIOS=$VMDIR/vbios
 OVMF=$VMDIR/firmware
 
