@@ -21,6 +21,19 @@ The following kernel parameters are needed for the VM
 ```
 intel_iommu=on iommu=pt vfio_iommu_type1.allow_unsafe_interrupts=1 kvm.ignore_msrs=1
 ```
+
+### qcow2 options
+
+use the following options for better IO performance on qcow2 images
+```
+qemu-img create -o lazy_refcounts=on,preallocation=metadata -f qcow2 WHDD.qcow2 64G
+```
+
+for max performance do full preallocation
+```
+qemu-img create -o lazy_refcounts=on,preallocation=full -f qcow2 WHDD.qcow2 64G
+```
+
 ### TODO
 
 - [x] Rebind GPU (Reset bug)

@@ -60,7 +60,7 @@ qemu-system-x86_64 \
     -device vfio-pci,host="$HDMIOMMU",bus=pcie.0 \
     -device virtio-net,netdev=vmnic -netdev user,id=vmnic \
     -drive file=/dev/sdc,format=raw,cache=writeback,if=virtio \
-    -drive file="$IMGS/WHDD.qcow2",format=qcow2,cache=writeback,if=virtio \
+    -drive file="$IMGS/WHDD.qcow2",format=qcow2,cache=writethrough,if=virtio \
     -device usb-host,hostbus="$BUS0",hostaddr="$ID0",id=hostdev0,bus=usb.0,port=1 \
     -device usb-host,hostbus="$BUS1",hostaddr="$ID1",id=hostdev1,bus=usb.0,port=2 \
     -device usb-host,hostbus="$BUS2",hostaddr="$ID2",id=hostdev2,bus=usb.0,port=3 \
