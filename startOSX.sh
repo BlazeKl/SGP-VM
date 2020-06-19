@@ -85,11 +85,8 @@ qemu-system-x86_64 \
     -device vfio-pci,host="$CN8IOMMU",bus=root.1 \
     -netdev user,id=net0 \
     -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:c9:18:27 \
-    -device ich9-ahci,id=sata \
-    -drive id=ESP,if=none,format=qcow2,file="$IMGS/ESP.qcow2" \
-    -device ide-hd,bus=sata.2,drive=ESP \
-    -drive id=SystemDisk,if=none,file="$IMGS/MHDD.qcow2" \
-    -device ide-hd,bus=sata.4,drive=SystemDisk 
+    -drive id=ESP,file="$IMGS/ESP.qcow2",format=qcow2,cache=writeback,if=virtio \
+    -drive id=SystemDisk,file="$IMGS/MHDD.qcow2",format=qcow2,cache=writeback,if=virtio
     
 #Rebind Devices to host
 echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
