@@ -14,7 +14,6 @@ CN4IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA4PID.{0,0}" | cut -c
 CN5IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA5PID.{0,0}" | cut -c 1-7)
 CN6IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA6PID.{0,0}" | cut -c 1-7)
 CN7IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA7PID.{0,0}" | cut -c 1-7)
-CN8IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONB0VID:$CONB0PID.{0,0}" | cut -c 1-7)
 
 #Logout from main user
 pkill -9 -u pipe
@@ -35,7 +34,6 @@ echo -n "0000:$CN4IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
 echo -n "0000:$CN5IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
 echo -n "0000:$CN6IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
 echo -n "0000:$CN7IOMMU" > /sys/bus/pci/drivers/ehci-pci/unbind
-echo -n "0000:$CN8IOMMU" > /sys/bus/pci/drivers/xhci_hcd/unbind
 
 modprobe vfio-pci
 
@@ -49,7 +47,6 @@ echo -n "$CONA0VID $CONA4PID" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "$CONA0VID $CONA5PID" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "$CONA0VID $CONA6PID" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "$CONA0VID $CONA7PID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONB0VID $CONB0PID" > /sys/bus/pci/drivers/vfio-pci/new_id
 
 #Start the VM
 qemu-system-x86_64 \
@@ -72,7 +69,7 @@ qemu-system-x86_64 \
     -device pcie-root-port,port=0x8,chassis=7,id=pci.6,bus=pcie.0,multifunction=on,addr=0x1 \
     -device pcie-root-port,port=0x9,chassis=8,id=pci.7,bus=pcie.0,addr=0x1.0x1 \
     -device pcie-pci-bridge,id=pci.8,bus=pci.5,addr=0x0 \
-    -device vfio-pci,host="$GPUIOMMU",bus=root.1,addr=00.0,multifunction=on,x-vga=on,romfile="$VBIOS/Ellesmere.rom" \
+    -device vfio-pci,host="$GPUIOMMU",bus=root.1,addr=00.0,multifunction=on,x-vga=on,romfile="$VBIOS" \
     -device vfio-pci,host="$HDMIOMMU",bus=pcie.0 \
     -device vfio-pci,host="$CN0IOMMU",bus=root.1 \
     -device vfio-pci,host="$CN1IOMMU",bus=root.1 \
@@ -82,7 +79,6 @@ qemu-system-x86_64 \
     -device vfio-pci,host="$CN5IOMMU",bus=root.1 \
     -device vfio-pci,host="$CN6IOMMU",bus=root.1 \
     -device vfio-pci,host="$CN7IOMMU",bus=root.1 \
-    -device vfio-pci,host="$CN8IOMMU",bus=root.1 \
     -netdev user,id=net0 \
     -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:c9:18:27 \
     -drive id=ESP,file="$IMGS/ESP.qcow2",format=qcow2,cache=writeback,if=virtio \
@@ -99,7 +95,6 @@ echo -n "0000:$CN4IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 echo -n "0000:$CN5IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 echo -n "0000:$CN6IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 echo -n "0000:$CN7IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
-echo -n "0000:$CN8IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 
 echo -n "$GPUVID $GPUPID" > /sys/bus/pci/drivers/vfio-pci/remove_id
 echo -n "$GPUVID $HDMIPID" > /sys/bus/pci/drivers/vfio-pci/remove_id
@@ -111,7 +106,6 @@ echo -n "$CONA0VID $CONA4PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
 echo -n "$CONA0VID $CONA5PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
 echo -n "$CONA0VID $CONA6PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
 echo -n "$CONA0VID $CONA7PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONB0VID $CONB0PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
 
 modprobe -r vfio-pci
 
@@ -125,7 +119,6 @@ echo -n "0000:$CN4IOMMU" > /sys/bus/pci/drivers/uhci_hcd/bind
 echo -n "0000:$CN5IOMMU" > /sys/bus/pci/drivers/uhci_hcd/bind
 echo -n "0000:$CN6IOMMU" > /sys/bus/pci/drivers/uhci_hcd/bind
 echo -n "0000:$CN7IOMMU" > /sys/bus/pci/drivers/ehci-pci/bind
-echo -n "0000:$CN8IOMMU" > /sys/bus/pci/drivers/xhci_hcd/bind
 
 #Start display manager
 systemctl start sddm

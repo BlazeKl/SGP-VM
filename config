@@ -2,7 +2,7 @@
 OSK="ourhardworkbythesewordsguardedpleasedontsteal(c)AppleComputerInc"
 IMGS=/mnt/GAMES/VM
 VMDIR=${BASH_SOURCE%/*}
-VBIOS=$VMDIR/vbios
+VBIOS=$VMDIR/vbios/vbios.rom
 OVMF=$VMDIR/firmware
 
 #GPU IDs
@@ -20,5 +20,3 @@ CONA0VID='8086'
 	CONA5PID='3a35'
 	CONA6PID='3a36'
 	CONA7PID='3a3a'
-CONB0VID='1033'
-	CONB0PID='0194'
