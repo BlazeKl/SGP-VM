@@ -54,6 +54,8 @@ qemu-system-x86_64 \
     -nographic -vga none -parallel none -serial none \
     -enable-kvm -M q35 -m 8192 -cpu host,hv_relaxed,hv_time,kvm=off,hv_vendor_id=null,-hypervisor -smp 10,sockets=1,cores=5,threads=2 \
     -bios /usr/share/qemu/bios.bin -vga none \
+    -smbios type=0,vendor='Award Software International Inc.',version=Fh1,date=06/27/2011,release=2.4 \
+    -smbios type=1,manufacturer="Gigabyte technology Co. Ltd",product=X58A-UD3R,uuid=00000000-0000-0000-0000-1c6f65c58b71 \
     -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 \
     -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2 \
     -device pcie-root-port,port=0x12,chassis=4,id=pci.3,bus=pcie.0,addr=0x2.0x2 \
