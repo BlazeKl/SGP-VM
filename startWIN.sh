@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#Load config file
+source "${BASH_SOURCE%/*}/config"
+
 start_VM="qemu-system-x86_64 \
     -runas vm \
     -nographic -vga none -parallel none -serial none \
@@ -29,9 +32,6 @@ start_VM="qemu-system-x86_64 \
     -device vfio-pci,host=\"$CN6IOMMU\",bus=root.1 \
     -device vfio-pci,host=\"$CN7IOMMU\",bus=root.1 \
     "
-
-#Load config file
-source "${BASH_SOURCE%/*}/config"
 
 #Get Devices IOMMU IDs
 GPUIOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$GPUVID:$GPUPID.{0,0}" | cut -c 1-7)
