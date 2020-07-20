@@ -1,6 +1,6 @@
 #!/bin/bash
 
-alias start_VM = 'qemu-system-x86_64 \
+alias start_VM = "qemu-system-x86_64 \
     -runas vm \
     -nographic -vga none -parallel none -serial none \
     -enable-kvm -M q35 -m 8192 -cpu host,hv_relaxed,hv_time,kvm=off,hv_vendor_id=null,-hypervisor -smp 10,sockets=1,cores=5,threads=2 \
@@ -27,7 +27,7 @@ alias start_VM = 'qemu-system-x86_64 \
     -device vfio-pci,host="$CN4IOMMU",bus=root.1 \
     -device vfio-pci,host="$CN5IOMMU",bus=root.1 \
     -device vfio-pci,host="$CN6IOMMU",bus=root.1 \
-    -device vfio-pci,host="$CN7IOMMU",bus=root.1 \'
+    -device vfio-pci,host="$CN7IOMMU",bus=root.1 \"
 
 #Load config file
 source "${BASH_SOURCE%/*}/config"
