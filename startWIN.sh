@@ -2,6 +2,23 @@
 
 #Load config file
 source "${BASH_SOURCE%/*}/config"
+start_VM="qemu-system-x86_64 \
+    -runas vm \
+    -nographic -vga none -parallel none -serial none \
+    -enable-kvm -M q35 -m $RAM -cpu host,hv_relaxed,hv_time,kvm=off,hv_vendor_id=null,-hypervisor -smp $(( $CORES * $THREADS )),sockets=1,cores=$CORES,threads=$THREADS \
+    -bios /usr/share/qemu/bios.bin -vga none \
+    -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 \
+    -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2 \
+    -device pcie-root-port,port=0x12,chassis=4,id=pci.3,bus=pcie.0,addr=0x2.0x2 \
+    -device pcie-root-port,port=0x13,chassis=5,id=pci.4,bus=pcie.0,addr=0x2.0x3 \
+    -device pcie-root-port,port=0x14,chassis=6,id=pci.5,bus=pcie.0,addr=0x2.0x4 \
+    -device pcie-root-port,port=0x8,chassis=7,id=pci.6,bus=pcie.0,multifunction=on,addr=0x1 \
+    -device pcie-root-port,port=0x9,chassis=8,id=pci.7,bus=pcie.0,addr=0x1.0x1 \
+    -device pcie-pci-bridge,id=pci.8,bus=pci.5,addr=0x0 \
+    -device virtio-net,netdev=vmnic -netdev user,id=vmnic \
+    -drive file=/dev/sdc,format=raw,cache=writeback,if=virtio \
+    -drive file=\"$IMGS/WHDD.qcow2\",format=qcow2,cache=writethrough,if=virtio \
+"
 
 #Get Devices IOMMU IDs
 GPUIOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$GPUVID:$GPUPID.{0,0}" | cut -c 1-7)
@@ -48,26 +65,7 @@ echo -n "$CONA0VID $CONA5PID" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "$CONA0VID $CONA6PID" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "$CONA0VID $CONA7PID" > /sys/bus/pci/drivers/vfio-pci/new_id
 
-#Start the VM
-start_VM="qemu-system-x86_64 \
-    -runas vm \
-    -nographic -vga none -parallel none -serial none \
-    -enable-kvm -M q35 -m 8192 -cpu host,hv_relaxed,hv_time,kvm=off,hv_vendor_id=null,-hypervisor -smp 10,sockets=1,cores=5,threads=2 \
-    -bios /usr/share/qemu/bios.bin -vga none \
-    -smbios type=0,vendor='Award Software International Inc.',version=Fh1,date=06/27/2011,release=2.4 \
-    -smbios type=1,manufacturer=\"Gigabyte technology Co. Ltd\",product=X58A-UD3R,uuid=00000000-0000-0000-0000-1c6f65c58b71 \
-    -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 \
-    -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2 \
-    -device pcie-root-port,port=0x12,chassis=4,id=pci.3,bus=pcie.0,addr=0x2.0x2 \
-    -device pcie-root-port,port=0x13,chassis=5,id=pci.4,bus=pcie.0,addr=0x2.0x3 \
-    -device pcie-root-port,port=0x14,chassis=6,id=pci.5,bus=pcie.0,addr=0x2.0x4 \
-    -device pcie-root-port,port=0x8,chassis=7,id=pci.6,bus=pcie.0,multifunction=on,addr=0x1 \
-    -device pcie-root-port,port=0x9,chassis=8,id=pci.7,bus=pcie.0,addr=0x1.0x1 \
-    -device pcie-pci-bridge,id=pci.8,bus=pci.5,addr=0x0 \
-    -device virtio-net,netdev=vmnic -netdev user,id=vmnic \
-    -drive file=/dev/sdc,format=raw,cache=writeback,if=virtio \
-    -drive file=\"$IMGS/WHDD.qcow2\",format=qcow2,cache=writethrough,if=virtio \
-    -device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,x-vga=on,romfile=\"$VBIOS\" \
+start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,x-vga=on,romfile=\"$VBIOS\" \
     -device vfio-pci,host=\"$HDMIOMMU\",bus=pcie.0 \
     -device vfio-pci,host=\"$CN0IOMMU\",bus=root.1 \
     -device vfio-pci,host=\"$CN1IOMMU\",bus=root.1 \
@@ -77,7 +75,9 @@ start_VM="qemu-system-x86_64 \
     -device vfio-pci,host=\"$CN5IOMMU\",bus=root.1 \
     -device vfio-pci,host=\"$CN6IOMMU\",bus=root.1 \
     -device vfio-pci,host=\"$CN7IOMMU\",bus=root.1 \
-    "
+"
+
+#Start the VM    
 eval $start_VM
      
     

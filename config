@@ -5,6 +5,11 @@ VMDIR=${BASH_SOURCE%/*}
 VBIOS=$VMDIR/vbios/vbios.rom
 OVMF=$VMDIR/firmware
 
+#Hardware
+CORES=5
+THREADS=2
+RAM=8G
+
 #GPU IDs
 GPUVID='1002'
 	GPUPID='67df'
