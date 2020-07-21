@@ -133,6 +133,6 @@ echo -n "0000:$CN6IOMMU" > /sys/bus/pci/drivers/uhci_hcd/bind
 echo -n "0000:$CN7IOMMU" > /sys/bus/pci/drivers/ehci-pci/bind
 
 #Start display manager if killed
-if [ "$exit_g" == "true" ]; then
+if [ "$_exit_g" == "true" ]; then
     systemctl start $_d_manager
 fi
