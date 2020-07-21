@@ -29,8 +29,8 @@ start_VM="qemu-system-x86_64 \
 "
 
 #Get Devices IOMMU IDs
-GPUIOMMU=$(get_iommu ${GPUID/:/ })
-HDMIOMMU=$(get_iommu ${HDMID/:/ })
+GPUIOMMU=$(get_iommu $GPUID)
+HDMIOMMU=$(get_iommu $HDMID)
 
 CN0IOMMU=$(get_iommu $CONA0VID $CONA0PID)
 CN1IOMMU=$(get_iommu $CONA0VID $CONA1PID)
