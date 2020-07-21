@@ -51,19 +51,19 @@ if [ "$_exit_g" == "true" ]; then
 fi
 
 #Unbind Devices
-echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/amdgpu/unbind
-echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/snd_hda_intel/unbind
+echo -n "0000:$GPUIOMMU" > /sys/bus/pci/devices/0000:$GPUIOMMU/driver/unbind
+echo -n "0000:$HDMIOMMU" > /sys/bus/pci/devices/0000:$HDMIOMMU/driver/unbind
 start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,x-vga=on,romfile=\"$VBIOS\" \
     -device vfio-pci,host=\"$HDMIOMMU\",bus=pcie.0 \
 "
-echo -n "0000:$CN0IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
-echo -n "0000:$CN1IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
-echo -n "0000:$CN2IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
-echo -n "0000:$CN3IOMMU" > /sys/bus/pci/drivers/ehci-pci/unbind
-echo -n "0000:$CN4IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
-echo -n "0000:$CN5IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
-echo -n "0000:$CN6IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
-echo -n "0000:$CN7IOMMU" > /sys/bus/pci/drivers/ehci-pci/unbind
+echo -n "0000:$CN0IOMMU" > /sys/bus/pci/devices/0000:$CN0IOMMU/driver/unbind
+echo -n "0000:$CN1IOMMU" > /sys/bus/pci/devices/0000:$CN1IOMMU/driver/unbind
+echo -n "0000:$CN2IOMMU" > /sys/bus/pci/devices/0000:$CN2IOMMU/driver/unbind
+echo -n "0000:$CN3IOMMU" > /sys/bus/pci/devices/0000:$CN3IOMMU/driver/unbind
+echo -n "0000:$CN4IOMMU" > /sys/bus/pci/devices/0000:$CN4IOMMU/driver/unbind
+echo -n "0000:$CN5IOMMU" > /sys/bus/pci/devices/0000:$CN5IOMMU/driver/unbind
+echo -n "0000:$CN6IOMMU" > /sys/bus/pci/devices/0000:$CN6IOMMU/driver/unbind
+echo -n "0000:$CN7IOMMU" > /sys/bus/pci/devices/0000:$CN7IOMMU/driver/unbind
 
 modprobe vfio-pci
 
