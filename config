@@ -5,6 +5,11 @@ VMDIR=${BASH_SOURCE%/*}
 VBIOS=$VMDIR/vbios/vbios.rom
 OVMF=$VMDIR/firmware
 
+#Script options
+_exit_g="true"
+_m_user="pipe"
+_d_manager="sddm"
+
 #Hardware
 CORES=5
 THREADS=2

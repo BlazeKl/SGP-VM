@@ -31,6 +31,7 @@ start_VM="qemu-system-x86_64 \
 #Get Devices IOMMU IDs
 GPUIOMMU=$(get_iommu ${GPUID/:/ })
 HDMIOMMU=$(get_iommu ${HDMID/:/ })
+
 CN0IOMMU=$(get_iommu $CONA0VID $CONA0PID)
 CN1IOMMU=$(get_iommu $CONA0VID $CONA1PID)
 CN2IOMMU=$(get_iommu $CONA0VID $CONA2PID)
@@ -40,17 +41,21 @@ CN5IOMMU=$(get_iommu $CONA0VID $CONA5PID)
 CN6IOMMU=$(get_iommu $CONA0VID $CONA6PID)
 CN7IOMMU=$(get_iommu $CONA0VID $CONA7PID)
 
-#Logout from main user
-pkill -9 -u pipe
-systemctl stop sddm
+#Kill Host display
+if [ "$_exit_g" == "true" ]; then
+    pkill -9 -u $_m_user
+    systemctl stop $_d_manager
+    echo 0 > /sys/class/vtconsole/vtcon0/bind
+    echo 0 > /sys/class/vtconsole/vtcon1/bind
+    echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
+fi
 
 #Unbind Devices
-echo 0 > /sys/class/vtconsole/vtcon0/bind
-echo 0 > /sys/class/vtconsole/vtcon1/bind
-echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
-
 echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/amdgpu/unbind
 echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/snd_hda_intel/unbind
+start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,x-vga=on,romfile=\"$VBIOS\" \
+    -device vfio-pci,host=\"$HDMIOMMU\",bus=pcie.0 \
+"
 echo -n "0000:$CN0IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
 echo -n "0000:$CN1IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
 echo -n "0000:$CN2IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
@@ -64,6 +69,7 @@ modprobe vfio-pci
 
 echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "${HDMID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
+
 echo -n "$CONA0VID $CONA0PID" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "$CONA0VID $CONA1PID" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "$CONA0VID $CONA2PID" > /sys/bus/pci/drivers/vfio-pci/new_id
@@ -73,9 +79,7 @@ echo -n "$CONA0VID $CONA5PID" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "$CONA0VID $CONA6PID" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "$CONA0VID $CONA7PID" > /sys/bus/pci/drivers/vfio-pci/new_id
 
-start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,x-vga=on,romfile=\"$VBIOS\" \
-    -device vfio-pci,host=\"$HDMIOMMU\",bus=pcie.0 \
-    -device vfio-pci,host=\"$CN0IOMMU\",bus=root.1 \
+start_VM+="-device vfio-pci,host=\"$CN0IOMMU\",bus=root.1 \
     -device vfio-pci,host=\"$CN1IOMMU\",bus=root.1 \
     -device vfio-pci,host=\"$CN2IOMMU\",bus=root.1 \
     -device vfio-pci,host=\"$CN3IOMMU\",bus=root.1 \
@@ -92,6 +96,7 @@ eval $start_VM
 #Rebind Devices to host
 echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
+
 echo -n "0000:$CN0IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 echo -n "0000:$CN1IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 echo -n "0000:$CN2IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
@@ -103,6 +108,7 @@ echo -n "0000:$CN7IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 
 echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
 echo -n "${HDMID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
+
 echo -n "$CONA0VID $CONA0PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
 echo -n "$CONA0VID $CONA1PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
 echo -n "$CONA0VID $CONA2PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
@@ -116,6 +122,7 @@ modprobe -r vfio-pci
 
 echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/amdgpu/bind
 echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/snd_hda_intel/bind
+
 echo -n "0000:$CN0IOMMU" > /sys/bus/pci/drivers/uhci_hcd/bind
 echo -n "0000:$CN1IOMMU" > /sys/bus/pci/drivers/uhci_hcd/bind
 echo -n "0000:$CN2IOMMU" > /sys/bus/pci/drivers/uhci_hcd/bind
@@ -125,5 +132,7 @@ echo -n "0000:$CN5IOMMU" > /sys/bus/pci/drivers/uhci_hcd/bind
 echo -n "0000:$CN6IOMMU" > /sys/bus/pci/drivers/uhci_hcd/bind
 echo -n "0000:$CN7IOMMU" > /sys/bus/pci/drivers/ehci-pci/bind
 
-#Start display manager
-systemctl start sddm
+#Start display manager if killed
+if [ "$exit_g" == "true" ]; then
+    systemctl start $_d_manager
+fi
