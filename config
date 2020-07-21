@@ -11,11 +11,10 @@ THREADS=2
 RAM=8G
 
 #GPU IDs
-GPUVID='1002'
-	GPUPID='67df'
-	HDMIPID='aaf0'
+GPUID='1002:67df'
+HDMID='1002:aaf0'
 
-#USB Controllers IDs
+#Extra devices IDs
 CONA0VID='8086'
 	CONA0PID='3a37'
 	CONA1PID='3a38'

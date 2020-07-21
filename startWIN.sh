@@ -2,7 +2,7 @@
 
 #Functions
 get_iommu(){
-    local iommuID=$(lspci -n | grep -oE -m 1 ".{0,100}$1:$2.{0,0}" | cut -c 1-7)
+    local iommuID=$(lspci -n | grep -oE -m 1 ".{0,100}$1.{0,0}" | cut -c 1-7)
     echo $iommuID
 }
 
@@ -29,8 +29,8 @@ start_VM="qemu-system-x86_64 \
 "
 
 #Get Devices IOMMU IDs
-GPUIOMMU=$(get_iommu $GPUVID $GPUPID)
-HDMIOMMU=$(get_iommu $GPUVID $HDMIPID)
+GPUIOMMU=$(get_iommu ${GPUID/:/ })
+HDMIOMMU=$(get_iommu ${HDMID/:/ })
 CN0IOMMU=$(get_iommu $CONA0VID $CONA0PID)
 CN1IOMMU=$(get_iommu $CONA0VID $CONA1PID)
 CN2IOMMU=$(get_iommu $CONA0VID $CONA2PID)
@@ -62,8 +62,8 @@ echo -n "0000:$CN7IOMMU" > /sys/bus/pci/drivers/ehci-pci/unbind
 
 modprobe vfio-pci
 
-echo -n "$GPUVID $GPUPID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$GPUVID $HDMIPID" > /sys/bus/pci/drivers/vfio-pci/new_id
+echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
+echo -n "${HDMID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "$CONA0VID $CONA0PID" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "$CONA0VID $CONA1PID" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "$CONA0VID $CONA2PID" > /sys/bus/pci/drivers/vfio-pci/new_id
@@ -101,8 +101,8 @@ echo -n "0000:$CN5IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 echo -n "0000:$CN6IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 echo -n "0000:$CN7IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 
-echo -n "$GPUVID $GPUPID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$GPUVID $HDMIPID" > /sys/bus/pci/drivers/vfio-pci/remove_id
+echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
+echo -n "${HDMID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
 echo -n "$CONA0VID $CONA0PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
 echo -n "$CONA0VID $CONA1PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
 echo -n "$CONA0VID $CONA2PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
