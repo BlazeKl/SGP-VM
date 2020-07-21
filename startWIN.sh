@@ -32,14 +32,14 @@ start_VM="qemu-system-x86_64 \
 GPUIOMMU=$(get_iommu $GPUID)
 HDMIOMMU=$(get_iommu $HDMID)
 
-CN0IOMMU=$(get_iommu $CONA0VID $CONA0PID)
-CN1IOMMU=$(get_iommu $CONA0VID $CONA1PID)
-CN2IOMMU=$(get_iommu $CONA0VID $CONA2PID)
-CN3IOMMU=$(get_iommu $CONA0VID $CONA3PID)
-CN4IOMMU=$(get_iommu $CONA0VID $CONA4PID)
-CN5IOMMU=$(get_iommu $CONA0VID $CONA5PID)
-CN6IOMMU=$(get_iommu $CONA0VID $CONA6PID)
-CN7IOMMU=$(get_iommu $CONA0VID $CONA7PID)
+CN0IOMMU=$(get_iommu $D00ID)
+CN1IOMMU=$(get_iommu $D01ID)
+CN2IOMMU=$(get_iommu $D02ID)
+CN3IOMMU=$(get_iommu $D03ID)
+CN4IOMMU=$(get_iommu $D04ID)
+CN5IOMMU=$(get_iommu $D05ID)
+CN6IOMMU=$(get_iommu $D06ID)
+CN7IOMMU=$(get_iommu $D07ID)
 
 #Kill Host display
 if [ "$_exit_g" == "true" ]; then
@@ -70,14 +70,14 @@ modprobe vfio-pci
 echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "${HDMID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
 
-echo -n "$CONA0VID $CONA0PID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONA0VID $CONA1PID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONA0VID $CONA2PID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONA0VID $CONA3PID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONA0VID $CONA4PID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONA0VID $CONA5PID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONA0VID $CONA6PID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONA0VID $CONA7PID" > /sys/bus/pci/drivers/vfio-pci/new_id
+echo -n "${D00ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
+echo -n "${D01ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
+echo -n "${D02ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
+echo -n "${D03ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
+echo -n "${D04ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
+echo -n "${D05ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
+echo -n "${D06ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
+echo -n "${D07ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
 
 start_VM+="-device vfio-pci,host=\"$CN0IOMMU\",bus=root.1 \
     -device vfio-pci,host=\"$CN1IOMMU\",bus=root.1 \
@@ -109,14 +109,14 @@ echo -n "0000:$CN7IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
 echo -n "${HDMID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
 
-echo -n "$CONA0VID $CONA0PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONA0VID $CONA1PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONA0VID $CONA2PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONA0VID $CONA3PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONA0VID $CONA4PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONA0VID $CONA5PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONA0VID $CONA6PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONA0VID $CONA7PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
+echo -n "${D00ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
+echo -n "${D01ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
+echo -n "${D02ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
+echo -n "${D03ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
+echo -n "${D04ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
+echo -n "${D05ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
+echo -n "${D06ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
+echo -n "${D07ID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
 
 modprobe -r vfio-pci
 
