@@ -1,7 +1,15 @@
 #!/bin/bash
 
+#Functions
+get_iommu(){
+    local iommuID=$(lspci -n | grep -oE -m 1 ".{0,100}$1:$2.{0,0}" | cut -c 1-7)
+    echo $iommuID
+}
+
 #Load config file
 source "${BASH_SOURCE%/*}/config"
+
+#Set basic VM command, modified later in the script to add devices
 start_VM="qemu-system-x86_64 \
     -runas vm \
     -nographic -vga none -parallel none -serial none \
@@ -21,16 +29,16 @@ start_VM="qemu-system-x86_64 \
 "
 
 #Get Devices IOMMU IDs
-GPUIOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$GPUVID:$GPUPID.{0,0}" | cut -c 1-7)
-HDMIOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$GPUVID:$HDMIPID.{0,0}" | cut -c 1-7)
-CN0IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA0PID.{0,0}" | cut -c 1-7)
-CN1IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA1PID.{0,0}" | cut -c 1-7)
-CN2IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA2PID.{0,0}" | cut -c 1-7)
-CN3IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA3PID.{0,0}" | cut -c 1-7)
-CN4IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA4PID.{0,0}" | cut -c 1-7)
-CN5IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA5PID.{0,0}" | cut -c 1-7)
-CN6IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA6PID.{0,0}" | cut -c 1-7)
-CN7IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA7PID.{0,0}" | cut -c 1-7)
+GPUIOMMU=$(get_iommu $GPUVID $GPUPID)
+HDMIOMMU=$(get_iommu $GPUVID $HDMIPID)
+CN0IOMMU=$(get_iommu $CONA0VID $CONA0PID)
+CN1IOMMU=$(get_iommu $CONA0VID $CONA1PID)
+CN2IOMMU=$(get_iommu $CONA0VID $CONA2PID)
+CN3IOMMU=$(get_iommu $CONA0VID $CONA3PID)
+CN4IOMMU=$(get_iommu $CONA0VID $CONA4PID)
+CN5IOMMU=$(get_iommu $CONA0VID $CONA5PID)
+CN6IOMMU=$(get_iommu $CONA0VID $CONA6PID)
+CN7IOMMU=$(get_iommu $CONA0VID $CONA7PID)
 
 #Logout from main user
 pkill -9 -u pipe
