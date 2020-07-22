@@ -33,12 +33,3 @@ for max performance do full preallocation
 ```
 qemu-img create -o lazy_refcounts=on,preallocation=full -f qcow2 WHDD.qcow2 64G
 ```
-
-### TODO
-
-- [x] Rebind GPU (Reset bug)
-- [x] Better USB Passthrough
-- [x] Audio (USB)
-- [x] Fix OSX USB
-- [ ] Fix secondary monitor corruption on OSX
-- [ ] Fix low GPU performance after OSX usage
