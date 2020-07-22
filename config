@@ -1,14 +1,19 @@
 #Parameters
 OSK="ourhardworkbythesewordsguardedpleasedontsteal(c)AppleComputerInc"
-IMGS=/mnt/GAMES/VM
 VMDIR=${BASH_SOURCE%/*}
-VBIOS=$VMDIR/vbios/vbios.rom
 OVMF=$VMDIR/firmware
 
 #Script options
 _exit_g="true"
 _m_user="pipe"
 _d_manager="sddm"
+
+_imgs=/mnt/GAMES/VM
+_vbios=$VMDIR/vbios/vbios.rom
+
+_usb_devices="false"
+_pci_devices="true"
+
 
 #Hardware
 CORES=5
@@ -20,11 +25,5 @@ GPUID='1002:67df'
 HDMID='1002:aaf0'
 
 #Extra devices IDs
-D00ID='8086:3a37'
-D01ID='8086:3a38'
-D02ID='8086:3a39'
-D03ID='8086:3a3c'
-D04ID='8086:3a34'
-D05ID='8086:3a35'
-D06ID='8086:3a36'
-D07ID='8086:3a3a'
+PCIID=("8086:3a37" "8086:3a38" "8086:3a39" "8086:3a3c" "8086:3a34" "8086:3a35" "8086:3a36" "8086:3a3a" )
+USBID={""}
