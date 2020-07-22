@@ -1,7 +1,20 @@
 #!/bin/bash
 
+#Functions
+get_iommu(){
+    local iommuID=$(lspci -n | grep -oE -m 1 ".{0,100}$1.{0,0}" | cut -c 1-7)
+    echo $iommuID
+}
+
+get_kmodule(){
+    local kname=$(file /sys/bus/pci/devices/0000:$1/driver | grep -oE "drivers.{0,99}" | cut -b 9-99)
+    echo $kname
+}
+
 #Load config file
 source "${BASH_SOURCE%/*}/config"
+
+#Set basic VM command, modified later in the script to add devices
 start_VM="qemu-system-x86_64 \
     -runas vm \
     -nographic -vga none -parallel none -serial none \
@@ -17,65 +30,60 @@ start_VM="qemu-system-x86_64 \
     -device pcie-pci-bridge,id=pci.8,bus=pci.5,addr=0x0 \
     -device virtio-net,netdev=vmnic -netdev user,id=vmnic \
     -drive file=/dev/sdc,format=raw,cache=writeback,if=virtio \
-    -drive file=\"$IMGS/WHDD.qcow2\",format=qcow2,cache=writethrough,if=virtio \
+    -drive file=\"$_imgs/WHDD.qcow2\",format=qcow2,cache=writethrough,if=virtio \
 "
 
 #Get Devices IOMMU IDs
-GPUIOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$GPUVID:$GPUPID.{0,0}" | cut -c 1-7)
-HDMIOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$GPUVID:$HDMIPID.{0,0}" | cut -c 1-7)
-CN0IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA0PID.{0,0}" | cut -c 1-7)
-CN1IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA1PID.{0,0}" | cut -c 1-7)
-CN2IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA2PID.{0,0}" | cut -c 1-7)
-CN3IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA3PID.{0,0}" | cut -c 1-7)
-CN4IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA4PID.{0,0}" | cut -c 1-7)
-CN5IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA5PID.{0,0}" | cut -c 1-7)
-CN6IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA6PID.{0,0}" | cut -c 1-7)
-CN7IOMMU=$(lspci -n | grep -oE -m 1 ".{0,100}$CONA0VID:$CONA7PID.{0,0}" | cut -c 1-7)
+GPUIOMMU=$(get_iommu $GPUID)
+HDMIOMMU=$(get_iommu $HDMID)
+start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,x-vga=on,romfile=\"$_vbios\" \
+    -device vfio-pci,host=\"$HDMIOMMU\",bus=pcie.0 \
+"
 
-#Logout from main user
-pkill -9 -u pipe
-systemctl stop sddm
+if [ "$_pci_devices" == "true" ]; then
+    for n in "${PCIID[@]}"; do
+        PCIOMMU=$(get_iommu $n)
+        start_VM+="-device vfio-pci,host=\"$PCIOMMU\",bus=root.1 \
+        "
+    done
+fi
 
-#Unbind Devices
-echo 0 > /sys/class/vtconsole/vtcon0/bind
-echo 0 > /sys/class/vtconsole/vtcon1/bind
-echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
+#Kill Host display
+if [ "$_exit_g" == "true" ]; then
+    pkill -9 -u $_m_user
+    systemctl stop $_d_manager
+    echo 0 > /sys/class/vtconsole/vtcon0/bind
+    echo 0 > /sys/class/vtconsole/vtcon1/bind
+    echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
+fi
 
-echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/amdgpu/unbind
-echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/snd_hda_intel/unbind
-echo -n "0000:$CN0IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
-echo -n "0000:$CN1IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
-echo -n "0000:$CN2IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
-echo -n "0000:$CN3IOMMU" > /sys/bus/pci/drivers/ehci-pci/unbind
-echo -n "0000:$CN4IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
-echo -n "0000:$CN5IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
-echo -n "0000:$CN6IOMMU" > /sys/bus/pci/drivers/uhci_hcd/unbind
-echo -n "0000:$CN7IOMMU" > /sys/bus/pci/drivers/ehci-pci/unbind
+#Unbind PCI Devices
+GPUKM1=$(get_kmodule $GPUIOMMU)
+GPUKM2=$(get_kmodule $HDMIOMMU)
+echo -n "0000:$GPUIOMMU" > /sys/bus/pci/devices/0000:$GPUIOMMU/driver/unbind
+echo -n "0000:$HDMIOMMU" > /sys/bus/pci/devices/0000:$HDMIOMMU/driver/unbind
+
+if [ "$_pci_devices" == "true" ]; then
+    for n in "${PCIID[@]}"; do
+        PCIOMMU=$(get_iommu $n)
+        PCIKRN+=("$(get_kmodule $PCIOMMU)")
+        echo -n "0000:$PCIOMMU" > /sys/bus/pci/devices/0000:$PCIOMMU/driver/unbind
+    done
+fi
 
 modprobe vfio-pci
 
-echo -n "$GPUVID $GPUPID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$GPUVID $HDMIPID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONA0VID $CONA0PID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONA0VID $CONA1PID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONA0VID $CONA2PID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONA0VID $CONA3PID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONA0VID $CONA4PID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONA0VID $CONA5PID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONA0VID $CONA6PID" > /sys/bus/pci/drivers/vfio-pci/new_id
-echo -n "$CONA0VID $CONA7PID" > /sys/bus/pci/drivers/vfio-pci/new_id
+echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
+echo -n "${HDMID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
 
-start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,x-vga=on,romfile=\"$VBIOS\" \
-    -device vfio-pci,host=\"$HDMIOMMU\",bus=pcie.0 \
-    -device vfio-pci,host=\"$CN0IOMMU\",bus=root.1 \
-    -device vfio-pci,host=\"$CN1IOMMU\",bus=root.1 \
-    -device vfio-pci,host=\"$CN2IOMMU\",bus=root.1 \
-    -device vfio-pci,host=\"$CN3IOMMU\",bus=root.1 \
-    -device vfio-pci,host=\"$CN4IOMMU\",bus=root.1 \
-    -device vfio-pci,host=\"$CN5IOMMU\",bus=root.1 \
-    -device vfio-pci,host=\"$CN6IOMMU\",bus=root.1 \
-    -device vfio-pci,host=\"$CN7IOMMU\",bus=root.1 \
-"
+if [ "$_pci_devices" == "true" ]; then
+    for n in "${PCIID[@]}"; do
+        echo -n "${n/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
+    done
+fi
+
+#Add USB Devices
+##Under contrusction
 
 #Start the VM    
 eval $start_VM
@@ -84,38 +92,38 @@ eval $start_VM
 #Rebind Devices to host
 echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
-echo -n "0000:$CN0IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
-echo -n "0000:$CN1IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
-echo -n "0000:$CN2IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
-echo -n "0000:$CN3IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
-echo -n "0000:$CN4IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
-echo -n "0000:$CN5IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
-echo -n "0000:$CN6IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
-echo -n "0000:$CN7IOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 
-echo -n "$GPUVID $GPUPID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$GPUVID $HDMIPID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONA0VID $CONA0PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONA0VID $CONA1PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONA0VID $CONA2PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONA0VID $CONA3PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONA0VID $CONA4PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONA0VID $CONA5PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONA0VID $CONA6PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo -n "$CONA0VID $CONA7PID" > /sys/bus/pci/drivers/vfio-pci/remove_id
+if [ "$_pci_devices" == "true" ]; then
+    for n in "${PCIID[@]}"; do
+        PCIOMMU=$(get_iommu $n)
+        echo -n "0000:$PCIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
+    done
+fi
+
+echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
+echo -n "${HDMID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
+
+if [ "$_pci_devices" == "true" ]; then
+    for n in "${PCIID[@]}"; do
+        echo -n "${n/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
+    done
+fi
 
 modprobe -r vfio-pci
 
-echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/amdgpu/bind
-echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/snd_hda_intel/bind
-echo -n "0000:$CN0IOMMU" > /sys/bus/pci/drivers/uhci_hcd/bind
-echo -n "0000:$CN1IOMMU" > /sys/bus/pci/drivers/uhci_hcd/bind
-echo -n "0000:$CN2IOMMU" > /sys/bus/pci/drivers/uhci_hcd/bind
-echo -n "0000:$CN3IOMMU" > /sys/bus/pci/drivers/ehci-pci/bind
-echo -n "0000:$CN4IOMMU" > /sys/bus/pci/drivers/uhci_hcd/bind
-echo -n "0000:$CN5IOMMU" > /sys/bus/pci/drivers/uhci_hcd/bind
-echo -n "0000:$CN6IOMMU" > /sys/bus/pci/drivers/uhci_hcd/bind
-echo -n "0000:$CN7IOMMU" > /sys/bus/pci/drivers/ehci-pci/bind
+echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/$GPUKM1/bind
+echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/$GPUKM2/bind
 
-#Start display manager
-systemctl start sddm
+if [ "$_pci_devices" == "true" ]; then
+    num=0
+    for n in "${PCIID[@]}"; do
+        PCIOMMU=$(get_iommu $n)
+        echo -n "0000:$PCIOMMU" > /sys/bus/pci/drivers/${PCIKRN[$num]}/bind
+        num=$((num + 1))
+    done
+fi
+
+#Start display manager if killed
+if [ "$_exit_g" == "true" ]; then
+    systemctl start $_d_manager
+fi
