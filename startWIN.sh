@@ -40,7 +40,7 @@ start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunctio
     -device vfio-pci,host=\"$HDMIOMMU\",bus=pcie.0 \
 "
 
-if [ "$_pci_devices" == "true"]; then
+if [ "$_pci_devices" == "true" ]; then
     for n in "${PCIID[@]}"; do
         PCIOMMU=$(get_iommu $n)
         start_VM+="-device vfio-pci,host=\"$PCIOMMU\",bus=root.1 \
@@ -66,7 +66,7 @@ echo -n "0000:$HDMIOMMU" > /sys/bus/pci/devices/0000:$HDMIOMMU/driver/unbind
 if [ "$_pci_devices" == "true" ]; then
     for n in "${PCIID[@]}"; do
         PCIOMMU=$(get_iommu $n)
-        PCIKRN+=$(get_kmodule $PCIOMMU)
+        PCIKRN+=("$(get_kmodule $PCIOMMU)")
         echo -n "0000:$PCIOMMU" > /sys/bus/pci/devices/0000:$PCIOMMU/driver/unbind
     done
 fi
