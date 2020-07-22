@@ -117,9 +117,9 @@ echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/$GPUKM2/bind
 if [ "$_pci_devices" == "true" ]; then
     num=0
     for n in "${PCIID[@]}"; do
-        num=$((num + 1))
         PCIOMMU=$(get_iommu $n)
-        echo -n "0000:$PCIOMMU" > /sys/bus/pci/drivers/$(PCIKRN[$num])/bind
+        echo -n "0000:$PCIOMMU" > /sys/bus/pci/drivers/${PCIKRN[$num]}/bind
+        num=$((num + 1))
     done
 fi
 
