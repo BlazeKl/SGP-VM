@@ -119,7 +119,7 @@ if [ "$_pci_devices" == "true" ]; then
     for n in "${PCIID[@]}"; do
         num=$((num + 1))
         PCIOMMU=$(get_iommu $n)
-        echo -n "0000:$PCIOMMU" > /sys/bus/pci/drivers/$PCIKRN[$num]/bind
+        echo -n "0000:$PCIOMMU" > /sys/bus/pci/drivers/$(PCIKRN[$num])/bind
     done
 fi
 
