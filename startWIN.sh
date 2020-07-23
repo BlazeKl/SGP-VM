@@ -11,6 +11,16 @@ get_kmodule(){
     echo $kname
 }
 
+get_usbus(){
+    local usbbus=$(lsusb | grep -oE "[1-9].{0,17}$1.{0,0}" | cut -c 1)
+    echo $usbbus
+}
+
+get_usbid(){
+    local usbid=$(lsusb | grep -oE "[1-9].{0,6}$1.{0,0}" | cut -c 1)
+    echo $usbid
+}
+
 #Load config file
 source "${BASH_SOURCE%/*}/config"
 
@@ -22,6 +32,7 @@ start_VM="qemu-system-x86_64 \
     -bios /usr/share/qemu/bios.bin -vga none \
     -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 \
     -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2 \
+    -device pcie-root-port,port=0x11,chassis=3,id=pci.2,bus=pcie.0,addr=0x2.0x1 \
     -device pcie-root-port,port=0x12,chassis=4,id=pci.3,bus=pcie.0,addr=0x2.0x2 \
     -device pcie-root-port,port=0x13,chassis=5,id=pci.4,bus=pcie.0,addr=0x2.0x3 \
     -device pcie-root-port,port=0x14,chassis=6,id=pci.5,bus=pcie.0,addr=0x2.0x4 \
@@ -83,7 +94,14 @@ if [ "$_pci_devices" == "true" ]; then
 fi
 
 #Add USB Devices
-##Under contrusction
+##Under construction
+if [ "$_usb_devices" == "true" ];then
+    start_VM+="-device qemu-xhci,p2=15,p3=15,id=usb,bus=pci.2,addr=0x0 \
+    "
+    for n in "${USBID[@]}"; do
+        
+    done
+fi
 
 #Start the VM    
 eval $start_VM
