@@ -75,7 +75,7 @@ if [ "$_usb_devices" == "true" ];then
     port=1
     for n in "${USBID[@]}"; do
         BUS=$(get_usbus $n)
-        UID=$(get_usbid $m)
+        UID=$(get_usbid $n)
         start_VM+="-device usb-host,hostbus="$BUS",hostaddr="$UID",id=hostdev0,bus=usb.0,port=$port \
         "
         port=$((port + 1))

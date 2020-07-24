@@ -11,8 +11,8 @@ _d_manager="sddm"
 _imgs=/mnt/GAMES/VM
 _vbios=$VMDIR/vbios/vbios.rom
 
-_usb_devices="false"
-_pci_devices="true"
+_usb_devices="true"
+_pci_devices="false"
 
 
 #Hardware
