@@ -68,6 +68,20 @@ if [ "$_exit_g" == "true" ]; then
     echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
 fi
 
+#Add USB Devices
+if [ "$_usb_devices" == "true" ];then
+    start_VM+="-device qemu-xhci,p2=15,p3=15,id=usb,bus=pci.2,addr=0x0 \
+    "
+    port=1
+    for n in "${USBID[@]}"; do
+        BUS=$(get_usbus $n)
+        UID=$(get_usbid $m)
+        start_VM+="-device usb-host,hostbus="$BUS",hostaddr="$UID",id=hostdev0,bus=usb.0,port=$port \
+        "
+        port=$((port + 1))
+    done
+fi
+
 #Unbind PCI Devices
 GPUKM1=$(get_kmodule $GPUIOMMU)
 GPUKM2=$(get_kmodule $HDMIOMMU)
@@ -90,16 +104,6 @@ echo -n "${HDMID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
 if [ "$_pci_devices" == "true" ]; then
     for n in "${PCIID[@]}"; do
         echo -n "${n/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
-    done
-fi
-
-#Add USB Devices
-##Under construction
-if [ "$_usb_devices" == "true" ];then
-    start_VM+="-device qemu-xhci,p2=15,p3=15,id=usb,bus=pci.2,addr=0x0 \
-    "
-    for n in "${USBID[@]}"; do
-        
     done
 fi
 
