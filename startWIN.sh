@@ -70,9 +70,9 @@ if [ "$_usb_devices" == "true" ];then
     start_VM+="-device qemu-xhci,p2=15,p3=15,id=usb,bus=pci.2,addr=0x0 "
     port=1
     for n in "${USBID[@]}"; do
-        USBBUS=$(get_usbus $n)
-        USBUID=$(get_usbid $n)
-        start_VM+="-device usb-host,hostbus="$USBBUS",hostaddr="$USBID",id=hostdev$port,bus=usb.0,port=$port "
+        USB_BUS=$(get_usbus $n)
+        USB_ID=$(get_usbid $n)
+        start_VM+="-device usb-host,hostbus="$USB_BUS",hostaddr="$USB_ID",id=hostdev$port,bus=usb.0,port=$port "
         port=$((port + 1))
     done
 fi
