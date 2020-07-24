@@ -107,7 +107,8 @@ if [ "$_pci_devices" == "true" ]; then
     done
 fi
 
-#Start the VM    
+#Start the VM
+echo $start_VM > $VMDIR/command
 eval $start_VM
      
     
