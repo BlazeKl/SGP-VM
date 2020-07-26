@@ -11,9 +11,11 @@ _d_manager="sddm"
 _imgs=/mnt/GAMES/VM
 _vbios=$VMDIR/vbios/vbios.rom
 
-_usb_devices="true"
-_pci_devices="false"
+_usb_devices="false"
+_pci_devices="true"
 
+_usb_devices_osx="true"
+_pci_devices_osx="false"
 
 #Hardware
 CORES=6

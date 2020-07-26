@@ -28,7 +28,8 @@ source "${BASH_SOURCE%/*}/config"
 start_VM="qemu-system-x86_64 
     -runas vm 
     -nographic -vga none -parallel none -serial none 
-    -enable-kvm -M q35 -m $RAM -cpu host,hv_relaxed,hv_time,kvm=off,hv_vendor_id=null,-hypervisor -smp $(( $CORES * $THREADS )),sockets=1,cores=$CORES,threads=$THREADS 
+    -enable-kvm -M q35 -m $RAM 
+    -cpu host,hv_relaxed,hv_time,kvm=off,hv_vendor_id=null,-hypervisor -smp $(( $CORES * $THREADS )),sockets=1,cores=$CORES,threads=$THREADS 
     -bios /usr/share/qemu/bios.bin -vga none 
     -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 
     -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2 
