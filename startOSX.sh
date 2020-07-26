@@ -33,10 +33,10 @@ start_VM="qemu-system-x86_64
     -machine q35,accel=kvm 
     -smp $(( $CORES * $THREADS )),cores=$CORES,threads=$THREADS,sockets=1 
     -cpu Penryn,vendor=GenuineIntel,kvm=on,+sse3,+sse4.2,+aes,+invtsc 
-    -device isa-applesmc,osk="$OSK" 
+    -device isa-applesmc,osk=\"$OSK\" 
     -smbios type=2 
-    -drive if=pflash,format=raw,readonly,file="$OVMF/OVMF_CODE.fd" 
-    -drive if=pflash,format=raw,file="$OVMF/OVMF_VARS-1024x768.fd" 
+    -drive if=pflash,format=raw,readonly,file=\"$OVMF/OVMF_CODE.fd\" 
+    -drive if=pflash,format=raw,file=\"$OVMF/OVMF_VARS-1024x768.fd\" 
     -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 
     -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2 
     -device pcie-root-port,port=0x12,chassis=4,id=pci.3,bus=pcie.0,addr=0x2.0x2 
@@ -47,8 +47,8 @@ start_VM="qemu-system-x86_64
     -device pcie-pci-bridge,id=pci.8,bus=pci.5,addr=0x0 
     -netdev user,id=net0 
     -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:c9:18:27 
-    -drive id=ESP,file="$_imgs/ESP.qcow2",format=qcow2,cache=writeback,if=virtio 
-    -drive id=SystemDisk,file="$_imgs/MHDD.qcow2",format=qcow2,cache=writeback,if=virtio "
+    -drive id=ESP,file=\"$_imgs/ESP.qcow2\",format=qcow2,cache=writeback,if=virtio 
+    -drive id=SystemDisk,file=\"$_imgs/MHDD.qcow2\",format=qcow2,cache=writeback,if=virtio "
 
 #Get Devices IOMMU IDs
 GPUIOMMU=$(get_iommu $GPUID)
