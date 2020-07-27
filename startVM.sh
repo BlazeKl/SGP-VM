@@ -78,7 +78,7 @@ else
 fi
 
 #Add advanced options
-start_VM+="$_ext_parameters"
+start_VM+="$_ext_parameters "
 
 #Get Devices IOMMU IDs
 GPUIOMMU=$(get_iommu $GPUID)
