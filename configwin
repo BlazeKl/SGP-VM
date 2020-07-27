@@ -1,0 +1,27 @@
+#Parameters
+VMDIR=${BASH_SOURCE%/*}
+OVMF=$VMDIR/firmware
+
+#Script options
+_exit_g="true"
+_m_user="pipe"
+_d_manager="sddm"
+
+_imgs=/mnt/GAMES/VM
+_vbios=$VMDIR/vbios/vbios.rom
+
+_usb_devices="false"
+_pci_devices="true"
+
+#Hardware
+CORES=6
+THREADS=2
+RAM=10G
+
+#GPU IDs
+GPUID='1002:67df'
+HDMID='1002:aaf0'
+
+#Extra devices IDs
+PCIID=("8086:3a37" "8086:3a38" "8086:3a39" "8086:3a3c" "8086:3a34" "8086:3a35" "8086:3a36" "8086:3a3a")
+USBID=("1038:1228" "04a5:5001" "1532:0020" "1b3f:2008")

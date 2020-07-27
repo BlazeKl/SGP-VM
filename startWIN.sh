@@ -22,7 +22,7 @@ get_usbid(){
 }
 
 #Load config file
-source "${BASH_SOURCE%/*}/config"
+source "${BASH_SOURCE%/*}/configwin"
 
 #Set basic VM command, modified later in the script to add devices
 start_VM="qemu-system-x86_64 

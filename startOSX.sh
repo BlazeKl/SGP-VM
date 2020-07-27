@@ -22,7 +22,7 @@ get_usbid(){
 }
 
 #Load config file
-source "${BASH_SOURCE%/*}/config"
+source "${BASH_SOURCE%/*}/configosx"
 
 #Set basic VM command, modified later in the script to add devices
 start_VM="qemu-system-x86_64 
@@ -56,7 +56,7 @@ HDMIOMMU=$(get_iommu $HDMID)
 start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,x-vga=on,romfile=\"$_vbios\" 
     -device vfio-pci,host=\"$HDMIOMMU\",bus=pcie.0 "
 
-if [ "$_pci_devices_osx" == "true" ]; then
+if [ "$_pci_devices" == "true" ]; then
     for n in "${PCIID[@]}"; do
         PCIOMMU=$(get_iommu $n)
         start_VM+="-device vfio-pci,host=\"$PCIOMMU\",bus=root.1 "
@@ -73,7 +73,7 @@ if [ "$_exit_g" == "true" ]; then
 fi
 
 #Add USB Devices
-if [ "$_usb_devices_osx" == "true" ];then
+if [ "$_usb_devices" == "true" ];then
     start_VM+="-device ich9-usb-ehci1,id=usb,bus=pcie.0,addr=0x1d.0x7 
     -device ich9-usb-uhci1,masterbus=usb.0,firstport=0,bus=pcie.0,multifunction=on,addr=0x1d 
     -device ich9-usb-uhci2,masterbus=usb.0,firstport=2,bus=pcie.0,addr=0x1d.0x1 
@@ -93,7 +93,7 @@ GPUKM2=$(get_kmodule $HDMIOMMU)
 echo -n "0000:$GPUIOMMU" > /sys/bus/pci/devices/0000:$GPUIOMMU/driver/unbind
 echo -n "0000:$HDMIOMMU" > /sys/bus/pci/devices/0000:$HDMIOMMU/driver/unbind
 
-if [ "$_pci_devices_osx" == "true" ]; then
+if [ "$_pci_devices" == "true" ]; then
     for n in "${PCIID[@]}"; do
         PCIOMMU=$(get_iommu $n)
         PCIKRN+=("$(get_kmodule $PCIOMMU)")
@@ -106,7 +106,7 @@ modprobe vfio-pci
 echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "${HDMID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
 
-if [ "$_pci_devices_osx" == "true" ]; then
+if [ "$_pci_devices" == "true" ]; then
     for n in "${PCIID[@]}"; do
         echo -n "${n/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
     done
@@ -121,7 +121,7 @@ eval $start_VM
 echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 
-if [ "$_pci_devices_osx" == "true" ]; then
+if [ "$_pci_devices" == "true" ]; then
     for n in "${PCIID[@]}"; do
         PCIOMMU=$(get_iommu $n)
         echo -n "0000:$PCIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
@@ -131,7 +131,7 @@ fi
 echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
 echo -n "${HDMID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
 
-if [ "$_pci_devices_osx" == "true" ]; then
+if [ "$_pci_devices" == "true" ]; then
     for n in "${PCIID[@]}"; do
         echo -n "${n/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
     done
@@ -142,7 +142,7 @@ modprobe -r vfio-pci
 echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/$GPUKM1/bind
 echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/$GPUKM2/bind
 
-if [ "$_pci_devices_osx" == "true" ]; then
+if [ "$_pci_devices" == "true" ]; then
     num=0
     for n in "${PCIID[@]}"; do
         PCIOMMU=$(get_iommu $n)
