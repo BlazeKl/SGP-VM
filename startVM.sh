@@ -73,8 +73,7 @@ else
     -device pcie-root-port,port=0x8,chassis=7,id=pci.6,bus=pcie.0,multifunction=on,addr=0x1 
     -device pcie-root-port,port=0x9,chassis=8,id=pci.7,bus=pcie.0,addr=0x1.0x1 
     -device pcie-pci-bridge,id=pci.8,bus=pci.5,addr=0x0 
-    -device virtio-net,netdev=vmnic -netdev user,id=vmnic 
-    -drive file=\"$_imgs/WHDD.qcow2\",format=qcow2,cache=writethrough,if=virtio "
+    -device virtio-net,netdev=vmnic -netdev user,id=vmnic "
 fi
 
 #Add advanced options
