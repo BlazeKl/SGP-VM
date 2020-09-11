@@ -34,13 +34,13 @@ fi
 #Set basic VM command, modified later in the script to add devices
 if [ "$_is_osx" == "true" ]; then
     start_VM="qemu-system-x86_64 
-    -runas vm 
+    -runas $_current_user 
     -nographic -vga none -parallel none -serial none 
     -enable-kvm 
     -m $RAM -mem-prealloc
     -machine q35,accel=kvm 
     -smp $(( $CORES * $THREADS )),cores=$CORES,threads=$THREADS,sockets=1 
-    -cpu Penryn,vendor=GenuineIntel,kvm=on,rdtscp=off,+sse3,+sse4.2,+aes,+invtsc 
+    -cpu Penryn,vendor=GenuineIntel,kvm=on,+sse3,+sse4.2,+aes,+invtsc 
     -device isa-applesmc,osk=\"ourhardworkbythesewordsguardedpleasedontsteal(c)AppleComputerInc\" 
     -smbios type=2 
     -drive if=pflash,format=raw,readonly,file=\"$OVMF/OVMF_CODE.fd\" 
@@ -59,10 +59,10 @@ if [ "$_is_osx" == "true" ]; then
     -drive id=SystemDisk,file=\"$_imgs/MHDD.qcow2\",format=qcow2,cache=writeback,if=virtio "
 else
     start_VM="qemu-system-x86_64 
-    -runas vm 
+    -runas $_current_user 
     -nographic -vga none -parallel none -serial none 
     -enable-kvm -M q35 -m $RAM -mem-prealloc -no-hpet
-    -cpu host,hv_relaxed,hv_time,kvm=off,rdtscp=off,hv_vendor_id=null,-hypervisor -smp $(( $CORES * $THREADS )),sockets=1,cores=$CORES,threads=$THREADS 
+    -cpu host,hv_relaxed,hv_time,kvm=off,hv_vendor_id=null,-hypervisor -smp $(( $CORES * $THREADS )),sockets=1,cores=$CORES,threads=$THREADS 
     -bios /usr/share/qemu/bios.bin -vga none 
     -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 
     -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2 
@@ -93,8 +93,8 @@ if [ "$_pci_devices" == "true" ]; then
 fi
 
 #Kill Host display
-if [ "$_exit_g" == "true" ]; then
-    pkill -9 -u $_m_user
+if [ "$_exit_display" == "true" ]; then
+    pkill -9 -u $_logout_user
     systemctl stop $_d_manager
     echo 0 > /sys/class/vtconsole/vtcon0/bind
     echo 0 > /sys/class/vtconsole/vtcon1/bind
