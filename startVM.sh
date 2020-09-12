@@ -185,6 +185,6 @@ if [ "$_pci_devices" == "true" ]; then
 fi
 
 #Start display manager if killed
-if [ "$_exit_g" == "true" ]; then
+if [ "$_exit_display" == "true" ]; then
     systemctl start $_d_manager
 fi
