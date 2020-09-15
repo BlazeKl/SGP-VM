@@ -5,7 +5,7 @@ Simple GPU Passthrough QEMU/KVM script
 
 A GPU BIOS dump needs to be added to the virtual machine to use it,
 
-### AMDGPU reset bug
+### AMDGPU reset bug on Windows guest
 
 Batch script files are needed on the virtual machine to avoid AMDGPU reset bug, Win 10 Pro is needed
 
@@ -13,13 +13,14 @@ more info: https://forum.level1techs.com/t/linux-host-windows-guest-gpu-passthro
 
 ### Config files
 
-to use another custom config files (like win.cfg) do ```sudo ./startVM.sh win```
+To use another custom config files (like win.cfg) do ```sudo ./startVM.sh win```
 default.cfg is used if no config file is specified
 
 ### Using another user for single GPU passthrough
 
-Using another user on TTY with sudo permissions is useful to avoid errors with some DEs
-use ```_exit_g="true"``` to kill the host display
+For single GPU passthrough to work, the script needs to be run through another user on TTY to be able to kill the host display completely, the name of the user that runs the graphical environment needs to be specified on ```_logout_user=""```, use ```_exit_g="true"``` to kill the host display
+
+Remember to save anything before starting the VM
 
 ### OSX
 
