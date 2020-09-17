@@ -18,7 +18,7 @@ default.cfg is used if no config file is specified
 
 ### Using another user for single GPU passthrough
 
-For single GPU passthrough to work, the script needs to be run through another user on TTY to be able to kill the host display completely, the name of the user that runs the graphical environment needs to be specified on ```_logout_user=""```, use ```_exit_g="true"``` to kill the host display
+For single GPU passthrough to work, the script needs to be run through another user on TTY to be able to kill the host display completely, the name of the user that runs the graphical environment needs to be specified on ```_logout_user=""```, use ```_exit_display="true"``` to kill the host display
 
 Remember to save anything before starting the VM
 
