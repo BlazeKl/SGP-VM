@@ -145,11 +145,20 @@ if [ "$_pci_devices" == "true" ]; then
     done
 fi
 
+#Start SSH service
+if [ "$_host_ssh" == "true" ]; then
+    systemctl start sshd
+fi
+
 #Start the VM
 echo $start_VM > $VMDIR/command
 eval $start_VM
      
-    
+#Stop SSH service
+if [ "$_host_ssh" == "true" ]; then
+    systemctl stop sshd
+fi
+
 #Rebind Devices to host
 echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
