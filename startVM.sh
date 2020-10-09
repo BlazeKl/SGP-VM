@@ -95,7 +95,7 @@ fi
 #Kill Host display
 if [ "$_exit_display" == "true" ]; then
     pkill -9 -u $_logout_user
-    systemctl stop $_d_manager
+    systemctl isolate multi-user.target
     echo 0 > /sys/class/vtconsole/vtcon0/bind
     echo 0 > /sys/class/vtconsole/vtcon1/bind
     echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
@@ -195,5 +195,5 @@ fi
 
 #Start display manager if killed
 if [ "$_exit_display" == "true" ]; then
-    systemctl start $_d_manager
+    systemctl isolate graphical.target
 fi
