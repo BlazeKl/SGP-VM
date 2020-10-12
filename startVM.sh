@@ -150,6 +150,11 @@ if [ "$_host_ssh" == "true" ]; then
     systemctl start sshd
 fi
 
+#Start FTP service
+if [ "$_host_ftp" == "true" ]; then
+    systemctl start vsftpd
+fi
+
 #Start the VM
 echo $start_VM > $VMDIR/command
 eval $start_VM
@@ -157,6 +162,11 @@ eval $start_VM
 #Stop SSH service
 if [ "$_host_ssh" == "true" ]; then
     systemctl stop sshd
+fi
+
+#Stop FTP service
+if [ "$_host_ftp" == "true" ]; then
+    systemctl stop vsftpd
 fi
 
 #Rebind Devices to host
