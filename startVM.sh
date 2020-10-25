@@ -62,7 +62,13 @@ else
     -runas $_current_user 
     -nographic -vga none -parallel none -serial none 
     -enable-kvm -M q35 -m $RAM -mem-prealloc -no-hpet
-    -cpu host,hv_relaxed,hv_time,kvm=off,hv_vendor_id=null,-hypervisor -smp $(( $CORES * $THREADS )),sockets=1,cores=$CORES,threads=$THREADS 
+    -cpu host,hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=null 
+    -smp $(( $CORES * $THREADS )),sockets=1,cores=$CORES,threads=$THREADS 
+    -vcpu vcpunum=0,affinity=1 -vcpu vcpunum=1,affinity=7 
+    -vcpu vcpunum=2,affinity=2 -vcpu vcpunum=3,affinity=8 
+    -vcpu vcpunum=4,affinity=3 -vcpu vcpunum=5,affinity=9 
+    -vcpu vcpunum=6,affinity=4 -vcpu vcpunum=7,affinity=5 
+    -vcpu vcpunum=8,affinity=10 -vcpu vcpunum=9,affinity=11 
     -bios /usr/share/qemu/bios.bin -vga none 
     -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 
     -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2 
@@ -96,6 +102,7 @@ fi
 if [ "$_exit_display" == "true" ]; then
     pkill -9 -u $_logout_user
     systemctl isolate multi-user.target
+    sleep 2
     echo 0 > /sys/class/vtconsole/vtcon0/bind
     echo 0 > /sys/class/vtconsole/vtcon1/bind
     echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
@@ -205,5 +212,6 @@ fi
 
 #Start display manager if killed
 if [ "$_exit_display" == "true" ]; then
+    sleep 2
     systemctl isolate graphical.target
 fi
