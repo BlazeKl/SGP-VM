@@ -3,22 +3,22 @@
 #Functions
 get_iommu(){
     local iommuID=$(lspci -n | grep -oE -m 1 ".{0,100}$1.{0,0}" | cut -c 1-7)
-    echo $iommuID
+    echo -n $iommuID
 }
 
 get_kmodule(){
     local kname=$(file /sys/bus/pci/devices/0000:$1/driver | grep -oE "drivers.{0,99}" | cut -b 9-99)
-    echo $kname
+    echo -n $kname
 }
 
 get_usbus(){
     local usbbus=$(lsusb | grep -oE "[1-9].{0,17}$1.{0,0}" | cut -c 1)
-    echo $usbbus
+    echo -n $usbbus
 }
 
 get_usbid(){
     local usbid=$(lsusb | grep -oE "[1-9].{0,6}$1.{0,0}" | cut -c 1)
-    echo $usbid
+    echo -n $usbid
 }
 
 #Load config file
@@ -89,7 +89,11 @@ start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunctio
 if [ "$_pci_devices" == "true" ]; then
     for n in "${PCIID[@]}"; do
         PCIOMMU=$(get_iommu $n)
-        start_VM+="-device vfio-pci,host=\"$PCIOMMU\",bus=root.1 "
+        if [ -z "$PCIOMMU" ]; then
+            echo "[$n]Device not found"
+        else
+            start_VM+="-device vfio-pci,host=\"$PCIOMMU\",bus=root.1 "
+        fi
     done
 fi
 
@@ -98,13 +102,13 @@ if [ "$_exit_display" == "true" ]; then
     pkill -9 -u $_logout_user
     systemctl isolate multi-user.target
     sleep 2
-    echo 0 > /sys/class/vtconsole/vtcon0/bind
-    echo 0 > /sys/class/vtconsole/vtcon1/bind
-    echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
+    echo -n "0" > /sys/class/vtconsole/vtcon0/bind
+    echo -n "0" > /sys/class/vtconsole/vtcon1/bind
+    echo -n "efi-framebuffer.0" > /sys/bus/platform/drivers/efi-framebuffer/unbind
 fi
 
 #Add USB Devices
-if [ "$_usb_devices" == "true" ];then
+if [ "$_usb_devices" == "true" ]; then
     if [ "$_is_osx" == "true" ]; then
         start_VM+="-device ich9-usb-ehci1,id=usb,bus=pcie.0,addr=0x1d.0x7 
         -device ich9-usb-uhci1,masterbus=usb.0,firstport=0,bus=pcie.0,multifunction=on,addr=0x1d 
@@ -117,81 +121,48 @@ if [ "$_usb_devices" == "true" ];then
     for n in "${USBID[@]}"; do
         USB_BUS=$(get_usbus $n)
         USB_ID=$(get_usbid $n)
-        start_VM+="-device usb-host,hostbus="$USB_BUS",hostaddr="$USB_ID",id=hostdev$port,bus=usb.0,port=$port "
-        port=$((port + 1))
+        if [ -z "$USB_BUS" ] || [ -z "$USB_ID" ]; then
+            echo "[$n]Device not found"
+        else
+            start_VM+="-device usb-host,hostbus="$USB_BUS",hostaddr="$USB_ID",id=hostdev$port,bus=usb.0,port=$port "
+            port=$((port + 1))
+        fi
     done
 fi
 
 #Unbind PCI Devices
+modprobe vfio-pci
+
 GPUKM1=$(get_kmodule $GPUIOMMU)
 GPUKM2=$(get_kmodule $HDMIOMMU)
+
 echo -n "0000:$GPUIOMMU" > /sys/bus/pci/devices/0000:$GPUIOMMU/driver/unbind
 echo -n "0000:$HDMIOMMU" > /sys/bus/pci/devices/0000:$HDMIOMMU/driver/unbind
-
-if [ "$_pci_devices" == "true" ]; then
-    for n in "${PCIID[@]}"; do
-        PCIOMMU=$(get_iommu $n)
-        PCIKRN+=("$(get_kmodule $PCIOMMU)")
-        echo -n "0000:$PCIOMMU" > /sys/bus/pci/devices/0000:$PCIOMMU/driver/unbind
-    done
-fi
-
-modprobe vfio-pci
 
 echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
 echo -n "${HDMID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
 
 if [ "$_pci_devices" == "true" ]; then
     for n in "${PCIID[@]}"; do
-        echo -n "${n/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
+        PCIOMMU=$(get_iommu $n)
+        if [ -n "$PCIOMMU" ]; then
+            PCIKRN+=("$(get_kmodule $PCIOMMU)")
+            echo -n "0000:$PCIOMMU" > /sys/bus/pci/devices/0000:$PCIOMMU/driver/unbind
+            echo -n "${n/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
+        fi
     done
-fi
-
-#Start SSH service
-if [ "$_host_ssh" == "true" ]; then
-    systemctl start sshd
-fi
-
-#Start FTP service
-if [ "$_host_ftp" == "true" ]; then
-    systemctl start vsftpd
 fi
 
 #Start the VM
 echo $start_VM > $VMDIR/command
 eval $start_VM
-     
-#Stop SSH service
-if [ "$_host_ssh" == "true" ]; then
-    systemctl stop sshd
-fi
-
-#Stop FTP service
-if [ "$_host_ftp" == "true" ]; then
-    systemctl stop vsftpd
-fi
 
 #Rebind Devices to host
 echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
 
-if [ "$_pci_devices" == "true" ]; then
-    for n in "${PCIID[@]}"; do
-        PCIOMMU=$(get_iommu $n)
-        echo -n "0000:$PCIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
-    done
-fi
-
 echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
 echo -n "${HDMID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
-
-if [ "$_pci_devices" == "true" ]; then
-    for n in "${PCIID[@]}"; do
-        echo -n "${n/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
-    done
-fi
-
-modprobe -r vfio-pci
 
 echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/$GPUKM1/bind
 echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/$GPUKM2/bind
@@ -200,10 +171,16 @@ if [ "$_pci_devices" == "true" ]; then
     num=0
     for n in "${PCIID[@]}"; do
         PCIOMMU=$(get_iommu $n)
-        echo -n "0000:$PCIOMMU" > /sys/bus/pci/drivers/${PCIKRN[$num]}/bind
-        num=$((num + 1))
+        if [ -n "$PCIOMMU" ]; then
+            echo -n "0000:$PCIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
+            echo -n "${n/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
+            echo -n "0000:$PCIOMMU" > /sys/bus/pci/drivers/${PCIKRN[$num]}/bind
+            num=$((num + 1))
+        fi
     done
 fi
+
+modprobe -r vfio-pci
 
 #Start display manager if killed
 if [ "$_exit_display" == "true" ]; then
