@@ -1,5 +1,5 @@
 # SGP-VM
-Simple GPU Passthrough QEMU/KVM script
+Single GPU Passthrough QEMU/KVM script
 
 ### GPU BIOS
 
