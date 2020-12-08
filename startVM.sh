@@ -101,7 +101,7 @@ fi
 if [ "$_exit_display" == "true" ]; then
     pkill -9 -u $_logout_user
     systemctl isolate multi-user.target
-    sleep 2
+    sleep 5
     echo -n "0" > /sys/class/vtconsole/vtcon0/bind
     echo -n "0" > /sys/class/vtconsole/vtcon1/bind
     echo -n "efi-framebuffer.0" > /sys/bus/platform/drivers/efi-framebuffer/unbind
@@ -184,6 +184,6 @@ modprobe -r vfio-pci
 
 #Start display manager if killed
 if [ "$_exit_display" == "true" ]; then
-    sleep 2
+    sleep 5
     systemctl isolate graphical.target
 fi
