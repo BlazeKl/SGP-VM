@@ -83,7 +83,7 @@ start_VM+="$_ext_parameters "
 #Get Devices IOMMU IDs
 GPUIOMMU=$(get_iommu $GPUID)
 HDMIOMMU=$(get_iommu $HDMID)
-start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,romfile=\"$_vbios\" 
+start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,x-vga=on,romfile=\"$_vbios\" 
 -device vfio-pci,host=\"$HDMIOMMU\",bus=pcie.0 "
 
 if [ "$_pci_devices" == "true" ]; then
