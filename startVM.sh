@@ -62,7 +62,7 @@ else
     -runas $_current_user 
     -nographic -vga none -parallel none -serial none 
     -enable-kvm -M q35 -m $RAM -mem-prealloc -no-hpet
-    -cpu host,hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=null,kvm=off,-hypervisor 
+    -cpu host,hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=null,kvm=off,-hypervisor,migratable=no,+invtsc 
     -smp $(( $CORES * $THREADS )),sockets=1,cores=$CORES,threads=$THREADS 
     -bios /usr/share/qemu/bios.bin -vga none 
     -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 
@@ -83,7 +83,7 @@ start_VM+="$_ext_parameters "
 #Get Devices IOMMU IDs
 GPUIOMMU=$(get_iommu $GPUID)
 HDMIOMMU=$(get_iommu $HDMID)
-start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,x-vga=on,romfile=\"$_vbios\" 
+start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,romfile=\"$_vbios\" 
 -device vfio-pci,host=\"$HDMIOMMU\",bus=pcie.0 "
 
 if [ "$_pci_devices" == "true" ]; then
