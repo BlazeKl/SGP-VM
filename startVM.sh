@@ -31,32 +31,31 @@ else
     exit 1
 fi
 
-#Set basic VM command, modified later in the script to add devices
-start_VM="qemu-system-x86_64 
-    -runas $_current_user 
-    -nographic -vga none -parallel none -serial none 
+#Set QEMU arguments, modified later in the script to add devices
+args="-runas $_current_user
+    -nographic -vga none -parallel none -serial none
     -enable-kvm -M q35 -m $RAM -mem-prealloc -no-hpet
-    -cpu host,hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=null,kvm=off,-hypervisor,migratable=no,+invtsc 
-    -smp $(( $CORES * $THREADS )),sockets=1,cores=$CORES,threads=$THREADS 
+    -cpu host,hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=null,kvm=off,-hypervisor,migratable=no,+invtsc
+    -smp $(( $CORES * $THREADS )),sockets=1,cores=$CORES,threads=$THREADS
     -drive if=pflash,format=raw,readonly,file=/usr/share/ovmf/x64/OVMF_CODE.fd
-    -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 
-    -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2 
-    -device pcie-root-port,port=0x11,chassis=3,id=pci.2,bus=pcie.0,addr=0x2.0x1 
-    -device pcie-root-port,port=0x12,chassis=4,id=pci.3,bus=pcie.0,addr=0x2.0x2 
-    -device pcie-root-port,port=0x13,chassis=5,id=pci.4,bus=pcie.0,addr=0x2.0x3 
-    -device pcie-root-port,port=0x14,chassis=6,id=pci.5,bus=pcie.0,addr=0x2.0x4 
-    -device pcie-root-port,port=0x8,chassis=7,id=pci.6,bus=pcie.0,multifunction=on,addr=0x1 
-    -device pcie-root-port,port=0x9,chassis=8,id=pci.7,bus=pcie.0,addr=0x1.0x1 
-    -device pcie-pci-bridge,id=pci.8,bus=pci.5,addr=0x0 
+    -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1
+    -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2
+    -device pcie-root-port,port=0x11,chassis=3,id=pci.2,bus=pcie.0,addr=0x2.0x1
+    -device pcie-root-port,port=0x12,chassis=4,id=pci.3,bus=pcie.0,addr=0x2.0x2
+    -device pcie-root-port,port=0x13,chassis=5,id=pci.4,bus=pcie.0,addr=0x2.0x3
+    -device pcie-root-port,port=0x14,chassis=6,id=pci.5,bus=pcie.0,addr=0x2.0x4
+    -device pcie-root-port,port=0x8,chassis=7,id=pci.6,bus=pcie.0,multifunction=on,addr=0x1
+    -device pcie-root-port,port=0x9,chassis=8,id=pci.7,bus=pcie.0,addr=0x1.0x1
+    -device pcie-pci-bridge,id=pci.8,bus=pci.5,addr=0x0
     -device virtio-net,netdev=vmnic -netdev user,id=vmnic "
 
 #Add advanced options
-start_VM+="$_ext_parameters "
+args+="$_ext_parameters "
 
 #Get Devices IOMMU IDs
 GPUIOMMU=$(get_iommu $GPUID)
 HDMIOMMU=$(get_iommu $HDMID)
-start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,romfile=\"$_vbios\" 
+args+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,romfile=\"$_vbios\"
 -device vfio-pci,host=\"$HDMIOMMU\",bus=pcie.0 "
 
 if [ "$_pci_devices" == "true" ]; then
@@ -65,7 +64,7 @@ if [ "$_pci_devices" == "true" ]; then
         if [ -z "$PCIOMMU" ]; then
             echo "[$n]Device not found"
         else
-            start_VM+="-device vfio-pci,host=\"$PCIOMMU\",bus=root.1 "
+            args+="-device vfio-pci,host=\"$PCIOMMU\",bus=root.1 "
         fi
     done
 fi
@@ -82,7 +81,7 @@ fi
 
 #Add USB Devices
 if [ "$_usb_devices" == "true" ]; then
-    start_VM+="-device qemu-xhci,p2=15,p3=15,id=usb,bus=pci.2,addr=0x0 "
+    args+="-device qemu-xhci,p2=15,p3=15,id=usb,bus=pci.2,addr=0x0 "
     port=1
     for n in "${USBID[@]}"; do
         USB_BUS=$(get_usbus $n)
@@ -90,7 +89,7 @@ if [ "$_usb_devices" == "true" ]; then
         if [ -z "$USB_BUS" ] || [ -z "$USB_ID" ]; then
             echo "[$n]Device not found"
         else
-            start_VM+="-device usb-host,hostbus="$USB_BUS",hostaddr="$USB_ID",id=hostdev$port,bus=usb.0,port=$port "
+            args+="-device usb-host,hostbus="$USB_BUS",hostaddr="$USB_ID",id=hostdev$port,bus=usb.0,port=$port "
             port=$((port + 1))
         fi
     done
@@ -120,8 +119,8 @@ if [ "$_pci_devices" == "true" ]; then
 fi
 
 #Start the VM
-echo $start_VM > $VMDIR/command
-eval $start_VM
+echo $args > $VMDIR/arguments
+qemu-system-x86_64 $args
 
 #Rebind Devices to host
 echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
