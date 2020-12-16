@@ -1,9 +1,12 @@
 # SGP-VM
 Single GPU Passthrough QEMU/KVM script
 
-### GPU BIOS
+### Requirements
 
-A GPU BIOS dump needs to be added to the virtual machine to use it,
+* A GPU BIOS dump
+* QEMU
+* OVMF
+* Virtualization extensions (IOMMU)
 
 ### AMDGPU reset bug on Windows guest
 
@@ -21,11 +24,6 @@ default.cfg is used if no config file is specified
 For single GPU passthrough to work, the script needs to be run through another user on TTY to be able to kill the host display completely, the name of the user that runs the graphical environment needs to be specified on ```_logout_user=""```, use ```_exit_display="true"``` to kill the host display
 
 Remember to save anything before starting the VM
-
-### OSX
-
-Make an usable OSX qcow2 image (MHDD.qcow2) and copy ESP.qcow2 from https://github.com/foxlet/macOS-Simple-KVM
-use ```_is_osx="true"``` to enable OSX compatible hardware
 
 ### Kernel parameters
 

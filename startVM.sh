@@ -32,33 +32,7 @@ else
 fi
 
 #Set basic VM command, modified later in the script to add devices
-if [ "$_is_osx" == "true" ]; then
-    start_VM="qemu-system-x86_64 
-    -runas $_current_user 
-    -nographic -vga none -parallel none -serial none 
-    -enable-kvm 
-    -m $RAM -mem-prealloc
-    -machine q35,accel=kvm 
-    -smp $(( $CORES * $THREADS )),cores=$CORES,threads=$THREADS,sockets=1 
-    -cpu Penryn,vendor=GenuineIntel,kvm=on,+sse3,+sse4.2,+aes,+invtsc 
-    -device isa-applesmc,osk=\"ourhardworkbythesewordsguardedpleasedontsteal(c)AppleComputerInc\" 
-    -smbios type=2 
-    -drive if=pflash,format=raw,readonly,file=\"$OVMF/OVMF_CODE.fd\" 
-    -drive if=pflash,format=raw,file=\"$OVMF/OVMF_VARS-1024x768.fd\" 
-    -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 
-    -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2 
-    -device pcie-root-port,port=0x12,chassis=4,id=pci.3,bus=pcie.0,addr=0x2.0x2 
-    -device pcie-root-port,port=0x13,chassis=5,id=pci.4,bus=pcie.0,addr=0x2.0x3 
-    -device pcie-root-port,port=0x14,chassis=6,id=pci.5,bus=pcie.0,addr=0x2.0x4 
-    -device pcie-root-port,port=0x8,chassis=7,id=pci.6,bus=pcie.0,multifunction=on,addr=0x1 
-    -device pcie-root-port,port=0x9,chassis=8,id=pci.7,bus=pcie.0,addr=0x1.0x1 
-    -device pcie-pci-bridge,id=pci.8,bus=pci.5,addr=0x0 
-    -netdev user,id=net0 
-    -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:c9:18:27 
-    -drive id=ESP,file=\"$_imgs/ESP.qcow2\",format=qcow2,cache=writeback,if=virtio 
-    -drive id=SystemDisk,file=\"$_imgs/MHDD.qcow2\",format=qcow2,cache=writeback,if=virtio "
-else
-    start_VM="qemu-system-x86_64 
+start_VM="qemu-system-x86_64 
     -runas $_current_user 
     -nographic -vga none -parallel none -serial none 
     -enable-kvm -M q35 -m $RAM -mem-prealloc -no-hpet
@@ -75,7 +49,6 @@ else
     -device pcie-root-port,port=0x9,chassis=8,id=pci.7,bus=pcie.0,addr=0x1.0x1 
     -device pcie-pci-bridge,id=pci.8,bus=pci.5,addr=0x0 
     -device virtio-net,netdev=vmnic -netdev user,id=vmnic "
-fi
 
 #Add advanced options
 start_VM+="$_ext_parameters "
@@ -83,7 +56,7 @@ start_VM+="$_ext_parameters "
 #Get Devices IOMMU IDs
 GPUIOMMU=$(get_iommu $GPUID)
 HDMIOMMU=$(get_iommu $HDMID)
-start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,x-vga=on,romfile=\"$_vbios\" 
+start_VM+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,romfile=\"$_vbios\" 
 -device vfio-pci,host=\"$HDMIOMMU\",bus=pcie.0 "
 
 if [ "$_pci_devices" == "true" ]; then
@@ -109,14 +82,7 @@ fi
 
 #Add USB Devices
 if [ "$_usb_devices" == "true" ]; then
-    if [ "$_is_osx" == "true" ]; then
-        start_VM+="-device ich9-usb-ehci1,id=usb,bus=pcie.0,addr=0x1d.0x7 
-        -device ich9-usb-uhci1,masterbus=usb.0,firstport=0,bus=pcie.0,multifunction=on,addr=0x1d 
-        -device ich9-usb-uhci2,masterbus=usb.0,firstport=2,bus=pcie.0,addr=0x1d.0x1 
-        -device ich9-usb-uhci3,masterbus=usb.0,firstport=4,bus=pcie.0,addr=0x1d.0x2 "
-    else
-        start_VM+="-device qemu-xhci,p2=15,p3=15,id=usb,bus=pci.2,addr=0x0 "
-    fi
+    start_VM+="-device qemu-xhci,p2=15,p3=15,id=usb,bus=pci.2,addr=0x0 "
     port=1
     for n in "${USBID[@]}"; do
         USB_BUS=$(get_usbus $n)
