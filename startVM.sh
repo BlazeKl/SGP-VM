@@ -27,7 +27,7 @@ if [ "$1" == "" ] && [ -f "${BASH_SOURCE%/*}/default.cfg" ]; then
 elif [ -f "${BASH_SOURCE%/*}/$1.cfg" ]; then
     source "${BASH_SOURCE%/*}/$1.cfg"
 else
-    echo "Config file not found"
+    echo "Config file not found, exiting"
     exit 1
 fi
 
@@ -49,22 +49,27 @@ args="-runas $_current_user
     -device pcie-pci-bridge,id=pci.8,bus=pci.5,addr=0x0
     -device virtio-net,netdev=vmnic -netdev user,id=vmnic "
 
-#Add advanced options
+#Add config file arguments
 args+="$_ext_parameters "
 
 #Get Devices IOMMU IDs
 GPUIOMMU=$(get_iommu $GPUID)
 HDMIOMMU=$(get_iommu $HDMID)
-args+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,romfile=\"$_vbios\"
--device vfio-pci,host=\"$HDMIOMMU\",bus=pcie.0 "
+if [ -n "$GPUIOMMU" ] && [ -n "$HDMIOMMU" ]; then 
+    args+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,romfile=\"$_vbios\"
+    -device vfio-pci,host=\"$HDMIOMMU\",bus=pcie.0 "
+else
+    echo "[$GPUID/$HDMID]GPU not found, exiting"
+    exit 1
+fi
 
 if [ "$_pci_devices" == "true" ]; then
     for n in "${PCIID[@]}"; do
         PCIOMMU=$(get_iommu $n)
-        if [ -z "$PCIOMMU" ]; then
-            echo "[$n]Device not found"
-        else
+        if [ -n "$PCIOMMU" ]; then
             args+="-device vfio-pci,host=\"$PCIOMMU\",bus=root.1 "
+        else
+            echo "[$n]Device not found"
         fi
     done
 fi
@@ -86,11 +91,11 @@ if [ "$_usb_devices" == "true" ]; then
     for n in "${USBID[@]}"; do
         USB_BUS=$(get_usbus $n)
         USB_ID=$(get_usbid $n)
-        if [ -z "$USB_BUS" ] || [ -z "$USB_ID" ]; then
-            echo "[$n]Device not found"
-        else
+        if [ -n "$USB_BUS" ] && [ -n "$USB_ID" ]; then
             args+="-device usb-host,hostbus="$USB_BUS",hostaddr="$USB_ID",id=hostdev$port,bus=usb.0,port=$port "
             port=$((port + 1))
+        else
+            echo "[$n]Device not found"
         fi
     done
 fi
