@@ -64,7 +64,7 @@ else
     -enable-kvm -M q35 -m $RAM -mem-prealloc -no-hpet
     -cpu host,hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=null,kvm=off,-hypervisor,migratable=no,+invtsc 
     -smp $(( $CORES * $THREADS )),sockets=1,cores=$CORES,threads=$THREADS 
-    -bios /usr/share/qemu/bios.bin -vga none 
+    -drive if=pflash,format=raw,readonly,file=/usr/share/ovmf/x64/OVMF_CODE.fd
     -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 
     -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2 
     -device pcie-root-port,port=0x11,chassis=3,id=pci.2,bus=pcie.0,addr=0x2.0x1 
