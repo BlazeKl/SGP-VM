@@ -57,7 +57,7 @@ GPUIOMMU=$(get_iommu $GPUID)
 HDMIOMMU=$(get_iommu $HDMID)
 if [ -n "$GPUIOMMU" ] && [ -n "$HDMIOMMU" ]; then 
     args+="-device vfio-pci,host=$GPUIOMMU,bus=root.1,addr=00.0,multifunction=on,romfile=$_vbios
-    -device vfio-pci,host=$HDMIOMMU,bus=pcie.0 "
+    -device vfio-pci,host=$HDMIOMMU,bus=root.1,addr=00.1 "
 else
     echo "[$GPUID/$HDMID]GPU not found, exiting"
     exit 1
