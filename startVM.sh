@@ -105,7 +105,7 @@ modprobe vfio-pci
 GPUKM1=$(get_kmodule $GPUIOMMU)
 GPUKM2=$(get_kmodule $HDMIOMMU)
 
-if [ $GPUKM1 != "vfio-pci"] && [ $GPUKM2 != "vfio-pci" ]; then
+if [ "$GPUKM1" != "vfio-pci" ] && [ "$GPUKM2" != "vfio-pci" ]; then
     echo -n "0000:$GPUIOMMU" > /sys/bus/pci/devices/0000:$GPUIOMMU/driver/unbind
     echo -n "0000:$HDMIOMMU" > /sys/bus/pci/devices/0000:$HDMIOMMU/driver/unbind
     echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
@@ -117,7 +117,7 @@ if [ "$_pci_devices" == "true" ]; then
         PCIOMMU=$(get_iommu $n)
         if [ -n "$PCIOMMU" ]; then
             PCIKRN+=("$(get_kmodule $PCIOMMU)")
-            if [ $(get_kmodule $PCIOMMU) != "vfio-pci" ]; then
+            if [ "$(get_kmodule $PCIOMMU)" != "vfio-pci" ]; then
                 echo -n "0000:$PCIOMMU" > /sys/bus/pci/devices/0000:$PCIOMMU/driver/unbind
                 echo -n "${n/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
             fi
@@ -130,7 +130,7 @@ echo $args > $VMDIR/arguments
 qemu-system-x86_64 $args
 
 #Rebind Devices to host if needed
-if [ $GPUKM1 != "vfio-pci" ] && [ $GPUKM2 != "vfio-pci" ]; then
+if [ "$GPUKM1" != "vfio-pci" ] && [ "$GPUKM2" != "vfio-pci" ]; then
     echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
     echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
     echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
@@ -144,7 +144,7 @@ if [ "$_pci_devices" == "true" ]; then
     for n in "${PCIID[@]}"; do
         PCIOMMU=$(get_iommu $n)
         if [ -n "$PCIOMMU" ]; then
-            if [ ${PCIKRN[$num]} != "vfio-pci" ]; then
+            if [ "${PCIKRN[$num]}" != "vfio-pci" ]; then
                 echo -n "0000:$PCIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
                 echo -n "${n/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
                 echo -n "0000:$PCIOMMU" > /sys/bus/pci/drivers/${PCIKRN[$num]}/bind
