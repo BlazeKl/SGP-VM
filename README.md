@@ -6,6 +6,7 @@ Single GPU Passthrough QEMU/KVM script
 * A GPU BIOS dump
 * QEMU
 * OVMF
+* VirtIO drivers for the guest
 * Virtualization extensions (IOMMU)
 
 ### AMDGPU reset bug on Windows guest
