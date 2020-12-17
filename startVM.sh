@@ -56,8 +56,8 @@ args+="$_ext_parameters "
 GPUIOMMU=$(get_iommu $GPUID)
 HDMIOMMU=$(get_iommu $HDMID)
 if [ -n "$GPUIOMMU" ] && [ -n "$HDMIOMMU" ]; then 
-    args+="-device vfio-pci,host=\"$GPUIOMMU\",bus=root.1,addr=00.0,multifunction=on,romfile=\"$_vbios\"
-    -device vfio-pci,host=\"$HDMIOMMU\",bus=pcie.0 "
+    args+="-device vfio-pci,host=$GPUIOMMU,bus=root.1,addr=00.0,multifunction=on,romfile=$_vbios
+    -device vfio-pci,host=$HDMIOMMU,bus=pcie.0 "
 else
     echo "[$GPUID/$HDMID]GPU not found, exiting"
     exit 1
@@ -67,7 +67,7 @@ if [ "$_pci_devices" == "true" ]; then
     for n in "${PCIID[@]}"; do
         PCIOMMU=$(get_iommu $n)
         if [ -n "$PCIOMMU" ]; then
-            args+="-device vfio-pci,host=\"$PCIOMMU\",bus=root.1 "
+            args+="-device vfio-pci,host=$PCIOMMU,bus=root.1 "
         else
             echo "[$n]Device not found"
         fi
@@ -92,7 +92,7 @@ if [ "$_usb_devices" == "true" ]; then
         USB_BUS=$(get_usbus $n)
         USB_ID=$(get_usbid $n)
         if [ -n "$USB_BUS" ] && [ -n "$USB_ID" ]; then
-            args+="-device usb-host,hostbus="$USB_BUS",hostaddr="$USB_ID",id=hostdev$port,bus=usb.0,port=$port "
+            args+="-device usb-host,hostbus=$USB_BUS,hostaddr=$USB_ID,id=hostdev$port,bus=usb.0,port=$port "
             port=$((port + 1))
         else
             echo "[$n]Device not found"
