@@ -39,7 +39,6 @@ args="-runas $_current_user
     -smp $(( $CORES * $THREADS )),sockets=1,cores=$CORES,threads=$THREADS
     -drive if=pflash,format=raw,readonly,file=/usr/share/ovmf/x64/OVMF_CODE.fd
     -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1
-    -device pcie-root-port,port=0x10,chassis=2,id=pci.1,bus=pcie.0,multifunction=on,addr=0x2
     -device virtio-net,netdev=vmnic -netdev user,id=vmnic "
 
 #Add config file arguments
