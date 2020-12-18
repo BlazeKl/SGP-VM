@@ -6,6 +6,7 @@ Single GPU Passthrough QEMU/KVM script
 * A GPU BIOS dump
 * QEMU
 * OVMF
+* Libvirt
 * VirtIO drivers for the guest
 * Virtualization extensions (IOMMU)
 

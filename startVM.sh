@@ -94,14 +94,10 @@ fi
 
 #Bind PCI Devices to vfio-pci if needed
 modprobe vfio-pci
-GPUKM1=$(get_kmodule $GPUIOMMU)
-GPUKM2=$(get_kmodule $HDMIOMMU)
 
-if [ "$GPUKM1" != "vfio-pci" ] && [ "$GPUKM2" != "vfio-pci" ]; then
-    echo -n "0000:$GPUIOMMU" > /sys/bus/pci/devices/0000:$GPUIOMMU/driver/unbind
-    echo -n "0000:$HDMIOMMU" > /sys/bus/pci/devices/0000:$HDMIOMMU/driver/unbind
-    echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
-    echo -n "${HDMID/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
+if [ "$(get_kmodule $GPUIOMMU)" != "vfio-pci" ] && [ "$(get_kmodule $HDMIOMMU)" != "vfio-pci" ]; then
+    virsh nodedev-detach pci_0000_${GPUIOMMU//[:.]/_}
+    virsh nodedev-detach pci_0000_${HDMIOMMU//[:.]/_}
 fi
 
 if [ "$_pci_devices" == "true" ]; then
@@ -110,8 +106,7 @@ if [ "$_pci_devices" == "true" ]; then
         if [ -n "$PCIOMMU" ]; then
             PCIKRN+=("$(get_kmodule $PCIOMMU)")
             if [ "$(get_kmodule $PCIOMMU)" != "vfio-pci" ]; then
-                echo -n "0000:$PCIOMMU" > /sys/bus/pci/devices/0000:$PCIOMMU/driver/unbind
-                echo -n "${n/:/ }" > /sys/bus/pci/drivers/vfio-pci/new_id
+                virsh nodedev-detach pci_0000_${PCIOMMU//[:.]/_}
             fi
         fi
     done
@@ -123,12 +118,8 @@ qemu-system-x86_64 $args
 
 #Rebind Devices to host if needed
 if [ "$GPUKM1" != "vfio-pci" ] && [ "$GPUKM2" != "vfio-pci" ]; then
-    echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
-    echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
-    echo -n "${GPUID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
-    echo -n "${HDMID/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
-    echo -n "0000:$GPUIOMMU" > /sys/bus/pci/drivers/$GPUKM1/bind
-    echo -n "0000:$HDMIOMMU" > /sys/bus/pci/drivers/$GPUKM2/bind
+    virsh nodedev-reattach pci_0000_${HDMIOMMU//[:.]/_}
+    virsh nodedev-reattach pci_0000_${GPUIOMMU//[:.]/_}
 fi
 
 if [ "$_pci_devices" == "true" ]; then
@@ -137,9 +128,7 @@ if [ "$_pci_devices" == "true" ]; then
         PCIOMMU=$(get_iommu $n)
         if [ -n "$PCIOMMU" ]; then
             if [ "${PCIKRN[$num]}" != "vfio-pci" ]; then
-                echo -n "0000:$PCIOMMU" > /sys/bus/pci/drivers/vfio-pci/unbind
-                echo -n "${n/:/ }" > /sys/bus/pci/drivers/vfio-pci/remove_id
-                echo -n "0000:$PCIOMMU" > /sys/bus/pci/drivers/${PCIKRN[$num]}/bind
+                virsh nodedev-reattach pci_0000_${PCIOMMU//[:.]/_}
             fi
             num=$((num + 1))
         fi
@@ -148,6 +137,7 @@ fi
 
 #Start display manager if killed
 if [ "$_exit_display" == "true" ]; then
+    echo -n "efi-framebuffer.0" > /sys/bus/platform/drivers/efi-framebuffer/bind
     sleep 5
     systemctl isolate graphical.target
 fi
