@@ -10,11 +10,13 @@ Single GPU Passthrough QEMU/KVM script
 * VirtIO drivers for the guest
 * Virtualization extensions (IOMMU)
 
-### AMDGPU reset bug on Windows guest
+### AMD GPU reset bug on Windows guest
 
-Batch script files are needed on the virtual machine to avoid AMDGPU reset bug, Win 10 Pro is needed
+A great fix for the AMD GPU reset bug is available here 
+https://github.com/gnif/vendor-reset
 
-more info: https://forum.level1techs.com/t/linux-host-windows-guest-gpu-passthrough-reinitialization-fix/121097
+if vendor-reset doesn't work, this workaround is still an option
+https://forum.level1techs.com/t/linux-host-windows-guest-gpu-passthrough-reinitialization-fix/121097
 
 ### Config files
 
