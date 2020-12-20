@@ -14,7 +14,7 @@ Single GPU Passthrough QEMU/KVM script
 
 The config file needs to be edited first to ensure everything will work, use ```default.cfg``` as a template
 
-To start the VM after editing the config file. do:
+To start the VM after editing the config file. do
 ```sudo nohup ./startVM.sh > ./output.log```
 
 ### Config files
