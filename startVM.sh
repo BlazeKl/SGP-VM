@@ -68,7 +68,6 @@ fi
 
 #Kill Host display
 if [ "$_exit_display" == "true" ]; then
-    pkill -9 -u $_logout_user
     systemctl isolate multi-user.target
     sleep 5
     echo -n "0" > /sys/class/vtconsole/vtcon0/bind

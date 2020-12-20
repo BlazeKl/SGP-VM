@@ -10,24 +10,17 @@ Single GPU Passthrough QEMU/KVM script
 * VirtIO drivers for the guest
 * Virtualization extensions (IOMMU)
 
-### AMD GPU reset bug on Windows guest
+### Usage
 
-A great fix for the AMD GPU reset bug is available here 
-https://github.com/gnif/vendor-reset
+The config file needs to be edited first to ensure everything will work, use ```default.cfg``` as a template
 
-if vendor-reset doesn't work, this workaround is still an option
-https://forum.level1techs.com/t/linux-host-windows-guest-gpu-passthrough-reinitialization-fix/121097
+To start the VM after editing the config file. do:
+```sudo nohup ./startVM.sh > ./output.log```
 
 ### Config files
 
-To use another custom config files (like win.cfg) do ```sudo ./startVM.sh win```
-default.cfg is used if no config file is specified
-
-### Using another user for single GPU passthrough
-
-For single GPU passthrough to work, the script needs to be run through another user on TTY to be able to kill the host display completely, the name of the user that runs the graphical environment needs to be specified on ```_logout_user=""```, use ```_exit_display="true"``` to kill the host display
-
-Remember to save anything before starting the VM
+To use another custom config files (like ```win.cfg```) do ```sudo nohup ./startVM.sh win > ./output.log```
+```default.cfg``` is used if no config file is specified
 
 ### Kernel parameters
 
@@ -35,6 +28,14 @@ The following kernel parameters are needed for the VM
 ```
 intel_iommu=on iommu=pt vfio_iommu_type1.allow_unsafe_interrupts=1 kvm.ignore_msrs=1
 ```
+
+### AMD GPU reset bug on Windows guest
+
+A great fix for the AMD GPU reset bug is available here 
+https://github.com/gnif/vendor-reset
+
+if vendor-reset doesn't work, this workaround is still an option
+https://forum.level1techs.com/t/linux-host-windows-guest-gpu-passthrough-reinitialization-fix/121097
 
 ### qcow2 options
 
