@@ -68,7 +68,7 @@ fi
 
 #Kill Host display
 if [ "$_exit_display" == "true" ]; then
-    systemctl stop display-manager.service
+    systemctl isolate multi-user.target
     sleep 5
     echo -n "0" > /sys/class/vtconsole/vtcon0/bind
     echo -n "0" > /sys/class/vtconsole/vtcon1/bind
@@ -137,5 +137,5 @@ fi
 #Start display manager if killed
 if [ "$_exit_display" == "true" ]; then
     echo -n "efi-framebuffer.0" > /sys/bus/platform/drivers/efi-framebuffer/bind
-    systemctl start display-manager.service
+    systemctl isolate graphical.target
 fi
