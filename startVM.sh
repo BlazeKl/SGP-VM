@@ -34,9 +34,9 @@ fi
 #Set QEMU arguments, modified later in the script to add devices
 args="-runas $_current_user
     -nographic -vga none -parallel none -serial none -nodefaults
-    -enable-kvm -M q35 -m $RAM -mem-prealloc -no-hpet
-    -cpu host,hv_time,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vendor_id=null,kvm=off,-hypervisor,migratable=no,+invtsc
-    -smp $(( $CORES * $THREADS )),sockets=1,cores=$CORES,threads=$THREADS
+    -enable-kvm -M q35 -m $_RAM -mem-prealloc -no-hpet
+    -cpu $_CPU
+    -smp $(( $_CORES * $_THREADS )),sockets=1,cores=$_CORES,threads=$_THREADS
     -drive if=pflash,format=raw,readonly,file=/usr/share/ovmf/x64/OVMF_CODE.fd
     -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1
     -device virtio-net,netdev=vmnic -netdev user,id=vmnic "
