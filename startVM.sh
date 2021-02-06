@@ -34,7 +34,7 @@ fi
 #Set QEMU arguments, modified later in the script to add devices
 args="-runas $_current_user
     -nographic -vga none -parallel none -serial none -nodefaults
-    -enable-kvm -M q35 -m $_RAM -mem-prealloc -no-hpet
+    -enable-kvm -M q35 -m $_RAM -no-hpet
     -cpu $_CPU
     -smp $(( $_CORES * $_THREADS )),sockets=1,cores=$_CORES,threads=$_THREADS
     -drive if=pflash,format=raw,readonly,file=/usr/share/ovmf/x64/OVMF_CODE.fd
