@@ -93,8 +93,10 @@ fi
 
 #Bind PCI Devices to vfio-pci if needed
 modprobe vfio-pci
+GPUKM1=$(get_kmodule $GPUIOMMU)
+GPUKM2=$(get_kmodule $HDMIOMMU)
 
-if [ "$(get_kmodule $GPUIOMMU)" != "vfio-pci" ] && [ "$(get_kmodule $HDMIOMMU)" != "vfio-pci" ]; then
+if [ "$GPUKM1" != "vfio-pci" ] && [ "$GPUKM2" != "vfio-pci" ]; then
     virsh nodedev-detach pci_0000_${GPUIOMMU//[:.]/_}
     virsh nodedev-detach pci_0000_${HDMIOMMU//[:.]/_}
 fi
