@@ -69,7 +69,7 @@ fi
 #Kill Host display
 if [ "$_exit_display" == "true" ]; then
     systemctl stop $_display_manager.service
-    if [ "$_display_manager" == "gdm"]; then
+    if [ "$_display_manager" == "gdm" ]; then
         killall gdm-x-session
     fi
     echo -n "0" > /sys/class/vtconsole/vtcon0/bind
@@ -100,6 +100,13 @@ GPUKM1=$(get_kmodule $GPUIOMMU)
 GPUKM2=$(get_kmodule $HDMIOMMU)
 
 if [ "$GPUKM1" != "vfio-pci" ] && [ "$GPUKM2" != "vfio-pci" ]; then
+    if [ "$GPUKM1" == "nvidia" ]; then
+        echo "Nvidia driver detected, removing modules..."
+        modprobe -r nvidia_drm
+        modprobe -r nvidia_modeset
+        modprobe -r nvidia_uvm
+        modprobe -r nvidia
+    fi
     virsh nodedev-detach pci_0000_${GPUIOMMU//[:.]/_}
     virsh nodedev-detach pci_0000_${HDMIOMMU//[:.]/_}
 fi
@@ -124,6 +131,13 @@ qemu-system-x86_64 $args
 if [ "$GPUKM1" != "vfio-pci" ] && [ "$GPUKM2" != "vfio-pci" ]; then
     virsh nodedev-reattach pci_0000_${HDMIOMMU//[:.]/_}
     virsh nodedev-reattach pci_0000_${GPUIOMMU//[:.]/_}
+    if [ "$GPUKM1" == "nvidia" ]; then
+        echo "Nvidia driver detected, reloading modules..."
+        modprobe nvidia_drm
+        modprobe nvidia_modeset
+        modprobe nvidia_uvm
+        modprobe nvidia
+    fi
 fi
 
 if [ "$_pci_devices" == "true" ]; then
@@ -141,6 +155,8 @@ fi
 
 #Start display manager if killed
 if [ "$_exit_display" == "true" ]; then
+    echo 1 > /sys/class/vtconsole/vtcon0/bind
+    echo 1 > /sys/class/vtconsole/vtcon1/bind
     echo -n "efi-framebuffer.0" > /sys/bus/platform/drivers/efi-framebuffer/bind
     systemctl isolate graphical.target
 fi
