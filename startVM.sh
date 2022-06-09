@@ -35,7 +35,7 @@ fi
 if [ "$_ovmf" == "true" ]; then
     args="-name sgpvm,debug-threads=on
     -runas $_current_user
-    -vga none -nodefaults
+    -nographic -vga none -parallel none -serial none -nodefaults
     -enable-kvm -M q35 -m $_RAM -mem-prealloc -no-hpet
     -cpu $_CPU
     -smp $(( $_CORES * $_THREADS )),sockets=1,cores=$_CORES,threads=$_THREADS
@@ -47,7 +47,7 @@ if [ "$_ovmf" == "true" ]; then
 else
     args="-name sgpvm,debug-threads=on
     -runas $_current_user
-    -vga none -nodefaults
+    -nographic -vga none -parallel none -serial none -nodefaults
     -enable-kvm -M q35 -m $_RAM -mem-prealloc -no-hpet
     -cpu $_CPU
     -smp $(( $_CORES * $_THREADS )),sockets=1,cores=$_CORES,threads=$_THREADS
